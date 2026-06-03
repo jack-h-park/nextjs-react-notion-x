@@ -1,14 +1,15 @@
+import fs from "node:fs";
+
 import { chromium } from "playwright";
-import fs from "fs";
 
 async function main() {
   // Launch the browser
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  
+
   // Set viewport size
   await page.setViewportSize({ width: 1280, height: 1000 });
-  
+
   const destDir = "/Users/jackpark/.gemini/antigravity/brain/dbd377ad-3d86-4f69-8f71-8dd323765d10";
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
@@ -35,7 +36,7 @@ async function main() {
 
   // 3. Visit Chat Config (Light mode)
   console.log("Navigating to Chat Config (Light)...");
-  // We navigate again to clear any forced dark mode state, although goto will reload the page anyway
+  // Navigate again to clear any forced dark mode state
   await page.goto(`${credentials}/admin/chat-config`, { waitUntil: "networkidle" });
   await page.screenshot({ path: `${destDir}/chat-config-light.png` });
   console.log("Chat Config Light screenshot saved.");
@@ -70,7 +71,9 @@ async function main() {
   console.log("Done capturing screenshots!");
 }
 
-main().catch(err => {
+try {
+  await main();
+} catch (err) {
   console.error("Capture failed:", err);
-  process.exit(1);
-});
+  throw err;
+}
