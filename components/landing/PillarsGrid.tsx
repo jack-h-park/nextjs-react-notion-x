@@ -64,7 +64,11 @@ const pillarIcons: readonly IconName[] = [
 
 export function PillarsGrid() {
   return (
-    <section className={styles.section} aria-labelledby="pillars-title">
+    <section
+      className={styles.section}
+      aria-labelledby="pillars-title"
+      id="philosophy"
+    >
       <h2 id="pillars-title" className={styles.sectionTitle} data-reveal="title">
         {pillars.title}
       </h2>

@@ -71,7 +71,7 @@ export function Hero() {
   }, []);
 
   return (
-    <header className={styles.hero}>
+    <header className={styles.hero} id="top">
       {/* Static wash — the permanent fallback under the Three.js field. */}
       <div className={styles.heroWash} aria-hidden="true" />
       {vibe !== "maximal" && fieldMounted && <ParticleField />}

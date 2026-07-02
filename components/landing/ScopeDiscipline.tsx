@@ -28,7 +28,7 @@ export function ScopeDiscipline() {
     // beat now comes from its outsized whitespace + display type, not a
     // dark block — a dark scrim over the faint light-mode atmosphere only
     // reads as flat gray and can't keep light text above AA.
-    <div className={styles.scopeBand}>
+    <div className={styles.scopeBand} id="discipline">
       <section className={styles.scopeSection} aria-labelledby="scope-title">
       <h2 id="scope-title" className={styles.scopeTitle}>
         <TitleWithEmphasis />

@@ -215,6 +215,15 @@ also drops the particle field to 40% opacity) → work cyan → trajectory
 purple → closing pink. Continuity is kept; each section gets its own
 temperature. All hues are token-derived `color-mix`.
 
+**Section progress rail (`SectionNav`).** The hue shift is *mood*, not
+wayfinding — too subtle to signal structure and color-only (weak for
+a11y). So the explicit structure signal is a fixed right-edge rail: seven
+chapter dots that highlight the current section (reusing `data-atmo` via a
+MutationObserver — single source of truth) and jump to it on click
+(`ScrollSmoother.scrollTo`, native `#id` anchor fallback). Labels reveal on
+hover/focus + for the active chapter; active dot is the mini-gradient.
+Desktop only (hidden ≤768px); each section carries an `id` anchor.
+
 **Decision gate.** After a live comparison the owner picks ONE direction:
 the losing mode's CSS/JS, the `VibeToggle`, and (if practical)
 `VibeProvider` are deleted — this is a decision tool, not a permanent

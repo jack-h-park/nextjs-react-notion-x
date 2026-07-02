@@ -10,6 +10,7 @@ export function ChainSection() {
       className={styles.section}
       aria-labelledby="chain-title"
       data-anim="chain-section"
+      id="chain"
     >
       <h2 id="chain-title" className={styles.sectionTitle} data-reveal="title">
         {chain.title}

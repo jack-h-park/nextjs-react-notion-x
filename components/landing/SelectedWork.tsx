@@ -30,6 +30,7 @@ export function SelectedWork() {
       className={styles.section}
       aria-labelledby="work-title"
       data-anim="work-section"
+      id="work"
     >
       <h2 id="work-title" className={styles.sectionTitle} data-reveal="title">
         {selectedWork.title}

@@ -10,6 +10,7 @@ import { LandingCursor } from "./LandingCursor";
 import { LandingFooter } from "./LandingFooter";
 import { PillarsGrid } from "./PillarsGrid";
 import { ScopeDiscipline } from "./ScopeDiscipline";
+import { SectionNav } from "./SectionNav";
 import { SelectedWork } from "./SelectedWork";
 import { Trajectory } from "./Trajectory";
 import { useLandingMotion } from "./useLandingMotion";
@@ -50,6 +51,7 @@ function LandingPageInner() {
       <div className={styles.vibeAtmoTint} aria-hidden="true" />
       {vibe === "maximal" && <LandingCursor />}
       <VibeToggle />
+      <SectionNav />
       {/* ScrollSmoother structure — wrapper/content pair (storyboard §4). */}
       <div data-smooth-wrapper className={styles.smoothWrapper}>
         <div data-smooth-content className={styles.smoothContent}>

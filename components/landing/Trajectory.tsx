@@ -4,7 +4,11 @@ import styles from "./landing.module.css";
 
 export function Trajectory() {
   return (
-    <section className={styles.section} aria-labelledby="trajectory-title">
+    <section
+      className={styles.section}
+      aria-labelledby="trajectory-title"
+      id="trajectory"
+    >
       <h2
         id="trajectory-title"
         className={styles.sectionTitle}
