@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   BufferAttribute,
   BufferGeometry,
-  Color,
+  type Color,
   PerspectiveCamera,
   Points,
   Scene,
@@ -11,14 +11,7 @@ import {
 } from "three";
 
 import styles from "../landing.module.css";
-
-// Brand gradient stops at the positions used by --gradient-full (storyboard §5).
-const GRADIENT_STOPS: ReadonlyArray<{ token: string; at: number }> = [
-  { token: "--brand-pink", at: 0 },
-  { token: "--brand-purple", at: 0.3 },
-  { token: "--brand-blue", at: 0.6 },
-  { token: "--brand-cyan", at: 1 },
-];
+import { readBrandStops, sampleGradient } from "./gradientStops";
 
 const VERTEX_SHADER = /* glsl */ `
   attribute float aPhase;
@@ -59,30 +52,6 @@ const FRAGMENT_SHADER = /* glsl */ `
     gl_FragColor = vec4(vColor, a);
   }
 `;
-
-function readBrandStops(el: HTMLElement): Array<{ color: Color; at: number }> {
-  const cs = getComputedStyle(el);
-  return GRADIENT_STOPS.map(({ token, at }) => ({
-    color: new Color(cs.getPropertyValue(token).trim() || "#888888"),
-    at,
-  }));
-}
-
-function sampleGradient(
-  stops: Array<{ color: Color; at: number }>,
-  t: number,
-): Color {
-  for (let i = 1; i < stops.length; i++) {
-    const prev = stops[i - 1];
-    const next = stops[i];
-    if (prev && next && t <= next.at) {
-      const local = (t - prev.at) / (next.at - prev.at);
-      return prev.color.clone().lerp(next.color, Math.min(Math.max(local, 0), 1));
-    }
-  }
-  const last = stops.at(-1);
-  return last ? last.color.clone() : new Color("#888888");
-}
 
 /**
  * Particle band abstracted from the JP monogram's horizontal bar: a loose

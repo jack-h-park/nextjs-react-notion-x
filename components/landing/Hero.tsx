@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { hero } from "@/content/landing";
 
 import styles from "./landing.module.css";
+import { useVibe } from "./VibeProvider";
 
 const ParticleField = dynamic(
   () => import("./three/ParticleField").then((m) => m.ParticleField),
@@ -30,8 +31,11 @@ function SubheadlineWithEmphasis() {
 
 export function Hero() {
   // Hydrate the Three.js layer only after the browser is idle so the
-  // HTML headline owns LCP (storyboard §5).
+  // HTML headline owns LCP (storyboard §5). In maximal the page-wide
+  // MorphField owns the field — a second hero canvas would double the
+  // GPU cost for no visual gain.
   const [fieldMounted, setFieldMounted] = useState(false);
+  const { vibe } = useVibe();
 
   useEffect(() => {
     let idleId: number | undefined;
@@ -70,7 +74,7 @@ export function Hero() {
     <header className={styles.hero}>
       {/* Static wash — the permanent fallback under the Three.js field. */}
       <div className={styles.heroWash} aria-hidden="true" />
-      {fieldMounted && <ParticleField />}
+      {vibe !== "maximal" && fieldMounted && <ParticleField />}
       {/* Contrast scrim — above the field, below the text (storyboard §0). */}
       <div className={styles.heroScrim} aria-hidden="true" />
       <div className={styles.heroInner} data-speed="0.92">
@@ -87,7 +91,11 @@ export function Hero() {
           {hero.positioning}
         </p>
         <div className={styles.heroCtaRow} data-anim="hero-item">
-          <Link href={hero.primaryCta.href} className={styles.buttonSecondary}>
+          <Link
+            href={hero.primaryCta.href}
+            className={styles.buttonSecondary}
+            data-magnetic
+          >
             {hero.primaryCta.label}
           </Link>
           <Link
