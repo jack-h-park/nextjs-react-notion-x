@@ -176,7 +176,7 @@ comparison**, toggled at runtime:
 | Mode | Scope | Status |
 |------|-------|--------|
 | `atmospheric` (default) | Persistent brand-hued ambient mesh + film grain behind the whole page (`.vibeBackdrop`), gradient hairline card borders, brand-tinted layered shadows + hover lift, tinted ghost numerals | **Phase 1 — built** |
-| `maximal` | Per-section WebGL scenes, pinned horizontal Selected Work gallery, custom cursor, oversized display type; ships with its own mobile-lite degradation (static gradients, no WebGL-per-section) | Phase 2 — pending |
+| `maximal` | ONE page-wide morphing WebGL field (`MorphField`: cloud → twisted ring → grid, driven by overall scroll progress — the "per-section scenes" promise on a single-canvas budget; the hero `ParticleField` is skipped to avoid a second canvas), pinned horizontal Selected Work gallery (layout flips only when JS sets `data-work-gallery`), custom dot+ring cursor with magnetic CTAs (`[data-magnetic]`), oversized editorial type + gradient ghost numerals, boosted mesh, page-tall column scrim for AA contrast. **Maximal-lite** (mobile / reduced-motion / no-WebGL): boosted mesh only, vertical stack, native cursor — self-contained, never falls back to atmospheric | **Phase 2 — built** |
 
 **Mechanics.** `VibeProvider` sets `data-vibe` on the landing root;
 persisted in `localStorage("landing-vibe")`; `?vibe=maximal` overrides (and

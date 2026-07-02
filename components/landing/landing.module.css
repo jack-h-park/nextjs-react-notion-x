@@ -908,3 +908,155 @@ a:focus-visible .miniUnderline {
 [data-vibe="atmospheric"] .chainIndex {
   color: color-mix(in srgb, var(--brand-blue) 18%, transparent);
 }
+
+/* ── Maximal (storyboard §8, phase 2) ───────────────────────────────
+   Experimental direction: page-wide morphing WebGL field, pinned
+   horizontal Selected Work gallery, custom cursor, oversized type.
+   Mobile is maximal-lite: the boosted mesh below, vertical stack, no
+   canvas, no cursor (self-contained — never falls back to atmospheric). */
+
+/* Page-wide morph canvas — above the mesh, below the smoother content. */
+.morphCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.morphCanvasVisible {
+  opacity: 1;
+}
+
+/* Boosted mesh: maximal-lite's whole background, and desktop's under-layer
+   beneath the canvas. Stronger stops than atmospheric on purpose. */
+[data-vibe="maximal"] .vibeBackdrop::before {
+  background:
+    radial-gradient(
+      46% 38% at 16% 18%,
+      color-mix(in srgb, var(--brand-pink) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 42% at 86% 14%,
+      color-mix(in srgb, var(--brand-cyan) 18%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      44% 40% at 80% 82%,
+      color-mix(in srgb, var(--brand-blue) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      42% 36% at 18% 86%,
+      color-mix(in srgb, var(--brand-purple) 22%, transparent),
+      transparent 70%
+    );
+}
+
+[data-vibe="maximal"] .vibeBackdrop::after {
+  opacity: 0.05;
+}
+
+/* Column scrim: the particle field stays vivid at the edges while the
+   centered text column keeps AA contrast (page-tall sibling of the hero
+   scrim idea). */
+[data-vibe="maximal"] .smoothContent {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--bg-page) 62%, transparent) 22%,
+    color-mix(in srgb, var(--bg-page) 62%, transparent) 78%,
+    transparent
+  );
+}
+
+/* Oversized editorial type. */
+[data-vibe="maximal"] .heroHeadline {
+  font-size: clamp(52px, 8.5vw, 124px);
+  letter-spacing: -0.035em;
+}
+
+[data-vibe="maximal"] .sectionIntro {
+  font-size: clamp(24px, 2.6vw, 40px);
+  line-height: 1.25;
+  max-width: 860px;
+}
+
+/* Ghost numerals become gradient signage (deliberate §8 deviation from the
+   "interactions only" mini-gradient budget). */
+[data-vibe="maximal"] .workIndex,
+[data-vibe="maximal"] .chainIndex {
+  background-image: var(--gradient-mini);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  /* Background signage: loud enough to read as a motif, quiet enough to
+     sit behind card titles it overlaps at 200px. */
+  opacity: 0.18;
+}
+
+[data-vibe="maximal"] .workIndex {
+  font-size: clamp(96px, 13vw, 200px);
+  top: -8px;
+}
+
+/* Horizontal gallery — layout flips ONLY when useLandingMotion sets
+   data-work-gallery (desktop maximal, motion allowed), so no-JS and
+   reduced-motion keep the vertical stack. */
+[data-vibe="maximal"] .section[data-work-gallery] {
+  max-width: none;
+  overflow: hidden;
+}
+
+[data-vibe="maximal"] [data-work-gallery] .workList {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: clamp(32px, 4vw, 64px);
+  width: max-content;
+  padding-right: 10vw;
+}
+
+[data-vibe="maximal"] [data-work-gallery] .workList > li {
+  flex: none;
+  display: flex;
+}
+
+[data-vibe="maximal"] [data-work-gallery] .workCard {
+  width: min(66vw, 840px);
+}
+
+/* Custom cursor (desktop fine pointers only — the CSS scope must match
+   LandingCursor's mount guard so the native cursor never vanishes without
+   a replacement). */
+.cursorDot,
+.cursorRing {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 80;
+  border-radius: 50%;
+}
+
+.cursorDot {
+  width: 8px;
+  height: 8px;
+  background: var(--text-primary);
+}
+
+.cursorRing {
+  width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 45%, transparent);
+}
+
+@media (pointer: fine) and (min-width: 769px) and (prefers-reduced-motion: no-preference) {
+  .page[data-vibe="maximal"],
+  .page[data-vibe="maximal"] a,
+  .page[data-vibe="maximal"] button {
+    cursor: none;
+  }
+}
