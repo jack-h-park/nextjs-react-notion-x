@@ -44,6 +44,10 @@ function LandingPageInner() {
           without stealing focus. Both self-bail on mobile/reduced motion. */}
       {vibe === "maximal" && <MorphField variant="bold" />}
       {vibe === "atmospheric" && <MorphField variant="ambient" />}
+      {/* Per-section atmosphere: its hue crossfades by chapter (data-atmo,
+          driven in useLandingMotion) so sections read as movements without
+          hard boundaries. Behind content, over the mesh + particles. */}
+      <div className={styles.vibeAtmoTint} aria-hidden="true" />
       {vibe === "maximal" && <LandingCursor />}
       <VibeToggle />
       {/* ScrollSmoother structure — wrapper/content pair (storyboard §4). */}

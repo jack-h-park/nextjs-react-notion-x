@@ -205,6 +205,16 @@ see-through and AA-legible. The section is now transparent (atmosphere
 flows through, dark type); its "slow down / focus" beat comes from its
 outsized whitespace + display type instead of the dark block.
 
+**Per-section atmosphere (rhythm without boundaries).** Removing every hard
+edge left the page reading as one undifferentiated flow, so the *ambient
+temperature* now shifts by chapter: a fixed `.vibeAtmoTint` glow whose hue
+crossfades (1s) as `data-atmo` on the root changes — set by a `ScrollTrigger`
+per section (the one spanning the viewport centre wins): hero pink → chain
+purple → pillars blue → **discipline** cool + faint (the quiet beat, which
+also drops the particle field to 40% opacity) → work cyan → trajectory
+purple → closing pink. Continuity is kept; each section gets its own
+temperature. All hues are token-derived `color-mix`.
+
 **Decision gate.** After a live comparison the owner picks ONE direction:
 the losing mode's CSS/JS, the `VibeToggle`, and (if practical)
 `VibeProvider` are deleted — this is a decision tool, not a permanent

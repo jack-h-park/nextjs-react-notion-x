@@ -61,6 +61,33 @@ export function useLandingMotion(vibe: LandingVibe) {
             effects: isDesktop,
           });
 
+          // ── Per-section atmosphere (storyboard §8) ──────────────────
+          // data-atmo on the root drives the ambient tint's hue (CSS
+          // crossfade) and calms the particle field through Discipline —
+          // section rhythm without hard boundaries. The section whose body
+          // spans the viewport centre owns the temperature.
+          root.dataset.atmo = "hero";
+          const atmoSections = [
+            { key: "hero", sel: '[data-anim="hero-headline"]' },
+            { key: "chain", sel: '[data-anim="chain-section"]' },
+            { key: "pillars", sel: '[data-anim="pillar-card"]' },
+            { key: "discipline", sel: '[data-anim="scope-statement"]' },
+            { key: "work", sel: '[data-anim="work-section"]' },
+            { key: "trajectory", sel: '[data-anim="timeline-wrap"]' },
+            { key: "closing", sel: '[data-anim="closing-headline"]' },
+          ];
+          for (const { key, sel } of atmoSections) {
+            const el = root.querySelector(sel);
+            if (!el) continue;
+            ScrollTrigger.create({
+              trigger: el,
+              start: "top center",
+              end: "bottom center",
+              onEnter: () => (root.dataset.atmo = key),
+              onEnterBack: () => (root.dataset.atmo = key),
+            });
+          }
+
           // ── Hero: eyebrow → headline lines → supporting items ──────
           const headline = root.querySelector<HTMLElement>(
             '[data-anim="hero-headline"]',

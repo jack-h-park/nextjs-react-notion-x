@@ -837,6 +837,61 @@ a:focus-visible .miniUnderline {
   }
 }
 
+/* Per-section atmosphere tint (storyboard §8). A soft fixed glow whose hue
+   crossfades by chapter — the ambient temperature shifts so sections read
+   as movements without hard boundaries. data-atmo on the root (set by
+   useLandingMotion on scroll) selects the hue; base = hero (pink). Sits
+   over the mesh + particles, behind content. Colours are token-derived. */
+.vibeAtmoTint {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-color: color-mix(in srgb, var(--brand-pink) 12%, transparent);
+  transition: background-color 1s ease;
+  -webkit-mask-image: radial-gradient(
+    82% 72% at 50% 38%,
+    black 12%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(82% 72% at 50% 38%, black 12%, transparent 100%);
+}
+
+[data-atmo="chain"] .vibeAtmoTint {
+  background-color: color-mix(in srgb, var(--brand-purple) 12%, transparent);
+}
+
+[data-atmo="pillars"] .vibeAtmoTint {
+  background-color: color-mix(in srgb, var(--brand-blue) 12%, transparent);
+}
+
+/* Discipline: the quiet beat — cooler and fainter. Paired with a calmed
+   particle field below so the section breathes without a dark block. */
+[data-atmo="discipline"] .vibeAtmoTint {
+  background-color: color-mix(in srgb, var(--brand-blue) 5%, transparent);
+}
+
+[data-atmo="discipline"] .morphCanvas {
+  opacity: 0.4;
+}
+
+[data-atmo="work"] .vibeAtmoTint {
+  background-color: color-mix(in srgb, var(--brand-cyan) 12%, transparent);
+}
+
+[data-atmo="trajectory"] .vibeAtmoTint {
+  background-color: color-mix(in srgb, var(--brand-purple) 11%, transparent);
+}
+
+[data-atmo="closing"] .vibeAtmoTint {
+  background-color: color-mix(in srgb, var(--brand-pink) 12%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vibeAtmoTint {
+    transition: none;
+  }
+}
+
 /* Comparison switch — solid surfaces (brand bans glassmorphism). */
 .vibeToggle {
   position: fixed;
