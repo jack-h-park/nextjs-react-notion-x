@@ -23,14 +23,21 @@ function StatValue({ stat }: { stat: CountUpStat }) {
 
 export function SelectedWork() {
   return (
-    <section className={styles.section} aria-labelledby="work-title">
+    // data-anim="work-section" is the maximal gallery pin target; the
+    // data-work-gallery attribute (set by useLandingMotion) flips the list
+    // horizontal so no-JS/reduced-motion keep the vertical stack.
+    <section
+      className={styles.section}
+      aria-labelledby="work-title"
+      data-anim="work-section"
+    >
       <h2 id="work-title" className={styles.sectionTitle} data-reveal="title">
         {selectedWork.title}
       </h2>
       <p className={styles.sectionIntro} data-reveal="intro">
         {selectedWork.intro}
       </p>
-      <ul className={styles.workList}>
+      <ul className={styles.workList} data-anim="work-list">
         {selectedWork.cards.map((card, index) => (
           <li key={card.index}>
             <Link

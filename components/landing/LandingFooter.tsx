@@ -94,6 +94,7 @@ export function LandingFooter() {
           href={closing.cta.href}
           className={styles.buttonPrimary}
           data-anim="closing-cta"
+          data-magnetic
         >
           {closing.cta.label}
         </Link>

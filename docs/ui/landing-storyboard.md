@@ -175,12 +175,17 @@ comparison**, toggled at runtime:
 
 | Mode | Scope | Status |
 |------|-------|--------|
-| `atmospheric` (default) | Persistent brand-hued ambient mesh + film grain behind the whole page (`.vibeBackdrop`), gradient hairline card borders, brand-tinted layered shadows + hover lift, tinted ghost numerals | **Phase 1 — built** |
-| `maximal` | Per-section WebGL scenes, pinned horizontal Selected Work gallery, custom cursor, oversized display type; ships with its own mobile-lite degradation (static gradients, no WebGL-per-section) | Phase 2 — pending |
+| `atmospheric` (default) | Persistent brand-hued ambient mesh + film grain behind the whole page (`.vibeBackdrop`), gradient hairline card borders, brand-tinted layered shadows + hover lift, tinted ghost numerals, **plus a faint page-wide particle layer** (`MorphField` `variant="ambient"` — low alpha, gentle drift, only partly resolves) so particles persist past the hero without stealing focus; the hero `ParticleField` stays for the hero converge. Desktop-only; mobile/reduced-motion keep mesh + hero field | **Phase 1 + ambient field — built** |
+| `maximal` | ONE page-wide morphing WebGL field (`MorphField`: cloud → twisted ring → grid, driven by overall scroll progress — the "per-section scenes" promise on a single-canvas budget; the hero `ParticleField` is skipped to avoid a second canvas), pinned horizontal Selected Work gallery (layout flips only when JS sets `data-work-gallery`), custom dot+ring cursor with magnetic CTAs (`[data-magnetic]`), oversized editorial type + gradient ghost numerals, boosted mesh, page-tall column scrim for AA contrast. **Maximal-lite** (mobile / reduced-motion / no-WebGL): boosted mesh only, vertical stack, native cursor — self-contained, never falls back to atmospheric | **Phase 2 — built** |
 
 **Mechanics.** `VibeProvider` sets `data-vibe` on the landing root;
 persisted in `localStorage("landing-vibe")`; `?vibe=maximal` overrides (and
-persists) for shareable comparison. The floating `VibeToggle` and the
+persists) for shareable comparison. **Switching modes does a full reload
+with `?vibe=…`, not a live swap** — the two modes mount/tear down
+ScrollSmoother pins, a WebGL canvas and the custom cursor, and reverting
+that mid-scroll leaves pin-spacers/transforms in a bad state; a fresh load
+is the path that already works (and this is a decision tool, not a hot
+setting). The floating `VibeToggle` and the
 backdrop live *outside* the ScrollSmoother content (fixed elements inside
 the transformed wrapper would unfix). The page base paint moved from the
 smoother wrapper/content onto the fixed `.vibeBackdrop`, which also keeps
@@ -192,6 +197,23 @@ not a wallpaper" rule; card borders use a gradient hairline outside the
 "interactions only" budget; film grain adds texture where the base system
 is flat. Each mode must keep AA text contrast and `prefers-reduced-motion`
 fallbacks (mesh drift pauses; static gradients remain).
+
+**Scene 3 inversion dropped.** The Discipline of No no longer forces the
+dark band (§3). Over the new continuous atmosphere a dark scrim only reads
+as flat gray — and light-text-on-dark-scrim-over-light-mesh can't be both
+see-through and AA-legible. The section is now transparent (atmosphere
+flows through, dark type); its "slow down / focus" beat comes from its
+outsized whitespace + display type instead of the dark block.
+
+**Per-section atmosphere (rhythm without boundaries).** Removing every hard
+edge left the page reading as one undifferentiated flow, so the *ambient
+temperature* now shifts by chapter: a fixed `.vibeAtmoTint` glow whose hue
+crossfades (1s) as `data-atmo` on the root changes — set by a `ScrollTrigger`
+per section (the one spanning the viewport centre wins): hero pink → chain
+purple → pillars blue → **discipline** cool + faint (the quiet beat, which
+also drops the particle field to 40% opacity) → work cyan → trajectory
+purple → closing pink. Continuity is kept; each section gets its own
+temperature. All hues are token-derived `color-mix`.
 
 **Decision gate.** After a live comparison the owner picks ONE direction:
 the losing mode's CSS/JS, the `VibeToggle`, and (if practical)
