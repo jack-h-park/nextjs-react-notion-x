@@ -37,9 +37,9 @@ const VERTEX_SHADER = /* glsl */ `
     // bar (the monogram hyphen) as the visitor scrolls — structure forming.
     vec3 p = position + aScatter * (1.0 - uConverge);
     float drift = mix(1.0, 0.25, uConverge);
-    p.y += sin(uTime * 0.3 + aPhase) * 0.4 * drift;
-    p.x += cos(uTime * 0.18 + aPhase * 1.7) * 0.3 * drift;
-    p.z += sin(uTime * 0.22 + aPhase * 2.3) * 0.3 * drift;
+    p.y += sin(uTime * 0.3 + aPhase) * 0.55 * drift;
+    p.x += cos(uTime * 0.18 + aPhase * 1.7) * 0.42 * drift;
+    p.z += sin(uTime * 0.22 + aPhase * 2.3) * 0.38 * drift;
     vec4 mv = modelViewMatrix * vec4(p + vec3(uParallax, 0.0), 1.0);
     gl_PointSize = aSize * (320.0 / -mv.z);
     vAlpha = smoothstep(-16.0, -4.0, mv.z);
@@ -54,7 +54,7 @@ const FRAGMENT_SHADER = /* glsl */ `
 
   void main() {
     float d = length(gl_PointCoord - 0.5);
-    float a = smoothstep(0.5, 0.08, d) * 0.5 * vAlpha;
+    float a = smoothstep(0.5, 0.08, d) * 0.62 * vAlpha;
     if (a < 0.01) discard;
     gl_FragColor = vec4(vColor, a);
   }
@@ -117,9 +117,9 @@ function buildGeometry(
     positions[i * 3 + 1] = x * 0.16 + gauss() * 0.18;
     positions[i * 3 + 2] = gauss() * 0.4;
 
-    scatters[i * 3] = gauss() * 1.4;
-    scatters[i * 3 + 1] = gauss() * 2.4;
-    scatters[i * 3 + 2] = gauss() * 3.2;
+    scatters[i * 3] = gauss() * 1.8;
+    scatters[i * 3 + 1] = gauss() * 2.9;
+    scatters[i * 3 + 2] = gauss() * 3.6;
 
     const color = sampleGradient(stops, t);
     colors[i * 3] = color.r;
@@ -159,7 +159,7 @@ export function ParticleField() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    const count = isMobile ? 800 : 3000;
+    const count = isMobile ? 800 : 3400;
 
     const scene = new Scene();
     const camera = new PerspectiveCamera(50, 1, 0.1, 60);
@@ -197,8 +197,8 @@ export function ParticleField() {
     const parallaxTarget = { x: 0, y: 0 };
     const parallax = material.uniforms.uParallax;
     const onPointerMove = (event: PointerEvent) => {
-      parallaxTarget.x = (event.clientX / window.innerWidth - 0.5) * 1.2;
-      parallaxTarget.y = (0.5 - event.clientY / window.innerHeight) * 0.8;
+      parallaxTarget.x = (event.clientX / window.innerWidth - 0.5) * 1.9;
+      parallaxTarget.y = (0.5 - event.clientY / window.innerHeight) * 1.2;
     };
 
     let rafId = 0;
@@ -219,14 +219,17 @@ export function ParticleField() {
       // Structure forms as the hero scrolls away (lerped for inertia).
       // Skipped under reduced motion — particles rest in the scattered cloud.
       if (!reducedMotion && uniforms.uConverge) {
-        const target = Math.min(window.scrollY / window.innerHeight, 1);
+        const target = Math.min(
+          window.scrollY / (window.innerHeight * 0.85),
+          1,
+        );
         const current = uniforms.uConverge.value as number;
-        uniforms.uConverge.value = current + (target - current) * 0.08;
+        uniforms.uConverge.value = current + (target - current) * 0.1;
       }
       if (parallax) {
         const value = parallax.value as [number, number];
-        value[0] += (parallaxTarget.x - value[0]) * 0.04;
-        value[1] += (parallaxTarget.y - value[1]) * 0.04;
+        value[0] += (parallaxTarget.x - value[0]) * 0.06;
+        value[1] += (parallaxTarget.y - value[1]) * 0.06;
       }
       renderFrame();
       rafId = requestAnimationFrame(loop);

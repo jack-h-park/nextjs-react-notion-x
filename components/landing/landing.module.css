@@ -276,7 +276,9 @@ a:focus-visible .miniUnderline {
   padding-top: 20px;
 }
 
-/* Connector tick above each node. */
+/* Connector tick above each node. --tick is tweened by the pinned Chain
+   timeline (useLandingMotion) so each tick draws in before its node rises;
+   it defaults to 1 so no-JS/reduced-motion render the finished state. */
 .chainNode::before {
   content: "";
   position: absolute;
@@ -285,6 +287,8 @@ a:focus-visible .miniUnderline {
   width: 32px;
   height: 1px;
   background: var(--border-default);
+  transform: scaleX(var(--tick, 1));
+  transform-origin: left center;
 }
 
 /* Oversized ghost numeral — compositional, not informational. */

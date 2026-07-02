@@ -5,10 +5,16 @@ import styles from "./landing.module.css";
 export function Trajectory() {
   return (
     <section className={styles.section} aria-labelledby="trajectory-title">
-      <h2 id="trajectory-title" className={styles.sectionTitle}>
+      <h2
+        id="trajectory-title"
+        className={styles.sectionTitle}
+        data-reveal="title"
+      >
         {trajectory.title}
       </h2>
-      <p className={styles.sectionIntro}>{trajectory.intro}</p>
+      <p className={styles.sectionIntro} data-reveal="intro">
+        {trajectory.intro}
+      </p>
       <div className={styles.timelineWrap} data-anim="timeline-wrap">
         <div
           className={styles.timelineProgress}
@@ -29,7 +35,7 @@ export function Trajectory() {
           ))}
         </ol>
       </div>
-      <ul className={styles.education}>
+      <ul className={styles.education} data-anim="education">
         {trajectory.education.map((entry) => (
           <li key={entry.school}>
             <span className={styles.educationSchool}>{entry.school}</span>{" "}

@@ -65,16 +65,21 @@ const pillarIcons: readonly IconName[] = [
 export function PillarsGrid() {
   return (
     <section className={styles.section} aria-labelledby="pillars-title">
-      <h2 id="pillars-title" className={styles.sectionTitle}>
+      <h2 id="pillars-title" className={styles.sectionTitle} data-reveal="title">
         {pillars.title}
       </h2>
-      <p className={styles.sectionIntro}>{pillars.intro}</p>
+      <p className={styles.sectionIntro} data-reveal="intro">
+        {pillars.intro}
+      </p>
       <div className={styles.pillarsGrid}>
         {pillars.items.map((pillar, index) => (
           <article
             key={pillar.name}
             className={styles.pillarCard}
             data-anim="pillar-card"
+            // Alternating lag: the 2×2 grid columns settle at slightly
+            // different rates, giving the grid depth without breaking rhythm.
+            data-lag={index % 2 === 0 ? "0.05" : "0.12"}
           >
             <PillarIcon name={pillarIcons[index] ?? "eye"} />
             <span className={styles.pillarName}>{pillar.name}</span>

@@ -68,9 +68,9 @@ Viewport-height opening. The argument stated before any proof.
 The thesis becomes a diagram. Source: `chain`.
 
 - **[V]** Four nodes laid out vertically (mobile) / as a connected horizontal sequence (desktop): node name in `--t-h2`, its one-liner in `--t-body` `--text-secondary`. Connectors are 1px `--border-default` lines. `chain.outro` ("Each layer is load-bearing.") sits below in `--t-h3`, centered.
-- **[M]** ScrollTrigger sequential reveal: each node fades up *and its connector draws in* (scaleX/scaleY 0→1) before the next node appears — the chain visibly *depends* on the previous link. ~0.4s per node, linked to scroll position (scrubbed), not time.
-- **[V/M]** Section exit: the **2px Full-gradient divider** draws left→right (scaleX 0→1) as the section completes. This is the page's one structural gradient moment — the chain "powering" everything below.
-- **[mobile]** Vertical layout is the native reading order; connectors become short vertical ticks.
+- **[M]** **Desktop: pinned set-piece (the page's signature scroll moment).** The section pins for ~140% of a viewport and the chain builds under the reader's scroll: each connector tick draws in (`--tick` scaleX 0→1), then its node rises — in strict dependency order — then the outro, then the divider. Scrubbed (`scrub: 1`), reversible.
+- **[V/M]** Section exit: the **2px Full-gradient divider** draws left→right (scaleX 0→1) as the pinned scene completes. This is the page's one structural gradient moment — the chain "powering" everything below.
+- **[mobile]** No pin — native scroll with the scrubbed sequential node reveal; connectors become short vertical ticks.
 
 **Beat:** the visitor *watches the dependency build*. Skipping ahead in the scroll never shows a node before its parent.
 
@@ -138,16 +138,18 @@ Source: `closing`.
 |-----------|-------|
 | Library | GSAP ≥3.13 (SplitText + ScrollTrigger, free since 3.13) |
 | Easing vocabulary | `power3.out` for entrances, `power2.out` for count-ups, `none` for scrubbed tweens |
-| Entrance distance | 16–24px translate-y, never more |
+| Entrance distance | 14–36px translate-y; cards add a settle-in scale (0.97–0.985 → 1); stats pop with `back.out(1.6)` |
 | Durations | 0.4–0.9s entrances; scrubbed sections have no duration (scroll-linked) |
-| Triggers | Scenes 1, 3 (statement), 5 = scrubbed; Scenes 2, 4, 6 = play-once on enter |
+| Triggers | Scene 1 = **pinned + scrubbed** (desktop; scrub-only on mobile); Scenes 3 (statement), 5 = scrubbed (`scrub: 1`); Scenes 2, 4, 6 = play-once on enter; every section overline/intro gets a staged reveal |
+| Parallax depth | Desktop only (`ScrollSmoother effects`): hero inner `data-speed 0.92`; work-card ghost numerals `data-lag 0.25`; work cards lag 0.05→0.13 down the stack; pillar cards alternate 0.05/0.12. Touch keeps native scroll with no effects. |
+| Resize safety | Both SplitText instances use `autoSplit` — masked hero lines re-split on resize/orientation change so they never clip; the hero rise plays once |
 | Reduced motion | `gsap.matchMedia('(prefers-reduced-motion: reduce)')`: all tweens jump to end state, count-ups render final values, scroll hint hidden. The Three.js field keeps a **slow ambient drift** (0.4× clock) but drops the scroll-coupled converge and the pointer parallax — the two motions that can trigger vestibular discomfort. The rAF loop still pauses off-screen (IntersectionObserver) and in background tabs (visibilitychange). |
 | Performance | Single rAF (GSAP ticker drives Three.js camera too); hero rAF stops via IntersectionObserver when canvas <1% visible; `will-change` only during active tweens |
 | CLS guard | SplitText runs after `document.fonts.ready`; split targets reserve their final box (`visibility` not `display` toggling) |
 
 ## 5 · Three.js Hero Spec (Scene 0 detail)
 
-- One `Points` object (~3,000 particles desktop / ~800 mobile), positions seeded from the JP monogram's bar-and-glyph silhouette then relaxed into a loose field — *abstracted from*, never *rendering*, the logo (the logo no-animate rule applies to the mark, not this field).
+- One `Points` object (~3,400 particles desktop / ~800 mobile), positions seeded from the JP monogram's bar-and-glyph silhouette then relaxed into a loose field — *abstracted from*, never *rendering*, the logo (the logo no-animate rule applies to the mark, not this field).
 - Custom `ShaderMaterial`: per-particle color = 4-stop gradient sampled by normalized x (stop values read from `--brand-*` tokens at init, not hard-coded — guardrail-compliant since they live in JS, but still token-sourced).
 - Motion: slow curl-noise drift (~0.02 units/s) + mouse parallax (lerped, ±8px world units). No bloom, no postprocessing — "calm system."
 - Loading: `next/dynamic({ ssr: false })`, mounted on `requestIdleCallback` (fallback `setTimeout 200ms`); until then a static CSS radial wash in `--ai-accent-bg` holds the space (also the permanent fallback for reduced-motion / WebGL-unavailable / mobile-low-power).
