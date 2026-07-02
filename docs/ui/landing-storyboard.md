@@ -166,3 +166,35 @@ Source: `closing`.
 1. **Full-gradient double-spend ruling** (§2): hero particle tint + closing CTA. Recommended reading: canvas background ≠ UI surface, so both stand. If rejected → particle field falls back to Mini gradient.
 2. ~~`/landing` → `/` swap timing~~ **Done (2026-06-16):** the landing owns `/`; the Notion studio home moved to `/studio` (`pages/studio.tsx`, root URL re-homed in `lib/map-page-url.ts`); `/landing` 301-redirects to `/`; `noindex` removed; `/studio` added to the sitemap.
 3. OG image per brand §7.3 — after visual lock (Phase 5).
+
+## 8 · Vibe Comparison Mode (temporary, 2026-07-02 →)
+
+The body of the page read as "plain" against the award-worthy brief, so two
+richer visual directions are being built side-by-side for a **live scroll
+comparison**, toggled at runtime:
+
+| Mode | Scope | Status |
+|------|-------|--------|
+| `atmospheric` (default) | Persistent brand-hued ambient mesh + film grain behind the whole page (`.vibeBackdrop`), gradient hairline card borders, brand-tinted layered shadows + hover lift, tinted ghost numerals | **Phase 1 — built** |
+| `maximal` | Per-section WebGL scenes, pinned horizontal Selected Work gallery, custom cursor, oversized display type; ships with its own mobile-lite degradation (static gradients, no WebGL-per-section) | Phase 2 — pending |
+
+**Mechanics.** `VibeProvider` sets `data-vibe` on the landing root;
+persisted in `localStorage("landing-vibe")`; `?vibe=maximal` overrides (and
+persists) for shareable comparison. The floating `VibeToggle` and the
+backdrop live *outside* the ScrollSmoother content (fixed elements inside
+the transformed wrapper would unfix). The page base paint moved from the
+smoother wrapper/content onto the fixed `.vibeBackdrop`, which also keeps
+the below-the-fold dark-mode guarantee.
+
+**Deliberate brand deviations (scoped to vibe modes, documented here):**
+ambient brand color as *atmosphere* stretches the "gradient is a signature,
+not a wallpaper" rule; card borders use a gradient hairline outside the
+"interactions only" budget; film grain adds texture where the base system
+is flat. Each mode must keep AA text contrast and `prefers-reduced-motion`
+fallbacks (mesh drift pauses; static gradients remain).
+
+**Decision gate.** After a live comparison the owner picks ONE direction:
+the losing mode's CSS/JS, the `VibeToggle`, and (if practical)
+`VibeProvider` are deleted — this is a decision tool, not a permanent
+setting. Mobile is implemented once, for the winning mode, as that mode's
+own lite variant (never by falling back to the other mode).

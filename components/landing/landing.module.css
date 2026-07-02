@@ -13,19 +13,16 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ScrollSmoother pins the wrapper to the viewport, so .page only paints one
-   screen tall. The page background must live on the smooth content — which
-   spans the full scroll height — or dark mode shows the white body below the
-   fold. min-height keeps it covering even when content is short. */
+/* Page paint moved to .vibeBackdrop (fixed, always covers the viewport, so
+   dark mode below the fold and over-scroll stay covered). Wrapper/content
+   must stay transparent so the ambient backdrop shows through. */
 .smoothContent {
-  background: var(--bg-page);
+  background: transparent;
   min-height: 100svh;
 }
 
-/* The fixed wrapper is the backdrop behind the translated content — tint it
-   too so no white body shows through on over-scroll or sub-pixel gaps. */
 .smoothWrapper {
-  background: var(--bg-page);
+  background: transparent;
 }
 
 /* Landing-scale fluid type. The jp-theme --t-* tokens are dashboard-scale;
@@ -763,4 +760,151 @@ a:focus-visible .miniUnderline {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* ── Vibe modes (storyboard §8) ─────────────────────────────────────
+   Live A/B layer between the two visual directions. "atmospheric" is the
+   default; "maximal" arrives in phase 2. All colors remain token-derived
+   (color-mix over brand/theme tokens — guardrail-compliant). The losing
+   direction is deleted at the decision gate. */
+
+/* Paint layer: base page color + ambient brand mesh + film grain.
+   Fixed and outside the smoother, so it also guarantees dark-mode
+   coverage below the fold and on over-scroll. */
+.vibeBackdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-page);
+  overflow: hidden;
+}
+
+/* Ambient mesh — four brand-hued blobs in slow counter-drift. transform/
+   opacity only (compositor-friendly); inset overscan hides the edges. */
+.vibeBackdrop::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  background:
+    radial-gradient(
+      42% 34% at 18% 20%,
+      color-mix(in srgb, var(--brand-pink) 12%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      46% 38% at 84% 16%,
+      color-mix(in srgb, var(--brand-cyan) 11%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      40% 36% at 78% 80%,
+      color-mix(in srgb, var(--brand-blue) 12%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38% 32% at 20% 84%,
+      color-mix(in srgb, var(--brand-purple) 13%, transparent),
+      transparent 70%
+    );
+  animation: vibeMeshDrift 26s ease-in-out infinite alternate;
+}
+
+/* Film grain — colorless SVG turbulence, so no color literals. Kills the
+   "flat vector" feel that reads as plain. */
+.vibeBackdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+@keyframes vibeMeshDrift {
+  from {
+    transform: translate3d(-2%, -1.5%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2%, 2.5%, 0) scale(1.07);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vibeBackdrop::before {
+    animation: none;
+  }
+}
+
+/* Comparison switch — solid surfaces (brand bans glassmorphism). */
+.vibeToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 60;
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.vibeOption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.vibeOption[aria-pressed="true"] {
+  background: var(--text-primary);
+  color: var(--bg-page);
+}
+
+/* ── Atmospheric: card depth ────────────────────────────────────────
+   Gradient hairline border (dual-background trick), layered brand-tinted
+   shadows, hover lift. `translate` (not transform) so GSAP-owned
+   transforms never conflict. */
+[data-vibe="atmospheric"] .pillarCard,
+[data-vibe="atmospheric"] .workCard {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+    linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--brand-purple) 34%, var(--border-subtle)),
+        color-mix(in srgb, var(--brand-blue) 20%, var(--border-subtle)) 45%,
+        color-mix(in srgb, var(--brand-cyan) 30%, var(--border-subtle))
+      )
+      border-box;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--text-primary) 4%, transparent),
+    0 14px 36px -14px color-mix(in srgb, var(--brand-purple) 15%, transparent);
+  transition:
+    box-shadow 0.25s ease,
+    translate 0.25s ease;
+}
+
+[data-vibe="atmospheric"] .pillarCard:hover,
+[data-vibe="atmospheric"] .workCard:hover,
+[data-vibe="atmospheric"] .workCard:focus-visible {
+  translate: 0 -3px;
+  box-shadow:
+    0 2px 4px color-mix(in srgb, var(--text-primary) 6%, transparent),
+    0 22px 52px -16px color-mix(in srgb, var(--brand-blue) 24%, transparent);
+}
+
+/* Ghost numerals pick up a quiet brand tint instead of neutral gray. */
+[data-vibe="atmospheric"] .workIndex {
+  color: color-mix(in srgb, var(--brand-purple) 16%, transparent);
+}
+
+[data-vibe="atmospheric"] .chainIndex {
+  color: color-mix(in srgb, var(--brand-blue) 18%, transparent);
 }
