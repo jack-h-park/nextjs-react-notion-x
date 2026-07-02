@@ -380,12 +380,10 @@ a:focus-visible .miniUnderline {
 /* Full-bleed inversion band — token values flip via the global .dark-mode
    scope defined in styles/jp-theme.css. */
 .scopeBand {
-  /* Translucent scrim, not an opaque block: the mid-page inversion beat
-     (Scene 3) stays a darker "focus zone", but the ambient mesh/particles
-     glow through so the atmosphere is continuous. 88% keeps large + body
-     text above AA over the lightest mesh behind it. --bg-page resolves to
-     the dark token here (the .dark-mode class on this same element). */
-  background: color-mix(in srgb, var(--bg-page) 88%, transparent);
+  /* Transparent: the ambient mesh/particles flow through this section
+     unbroken (storyboard §8). Text uses the normal (light-mode) tokens —
+     dark type over the light atmosphere. */
+  background: transparent;
   color: var(--text-primary);
 }
 

@@ -198,6 +198,13 @@ not a wallpaper" rule; card borders use a gradient hairline outside the
 is flat. Each mode must keep AA text contrast and `prefers-reduced-motion`
 fallbacks (mesh drift pauses; static gradients remain).
 
+**Scene 3 inversion dropped.** The Discipline of No no longer forces the
+dark band (§3). Over the new continuous atmosphere a dark scrim only reads
+as flat gray — and light-text-on-dark-scrim-over-light-mesh can't be both
+see-through and AA-legible. The section is now transparent (atmosphere
+flows through, dark type); its "slow down / focus" beat comes from its
+outsized whitespace + display type instead of the dark block.
+
 **Decision gate.** After a live comparison the owner picks ONE direction:
 the losing mode's CSS/JS, the `VibeToggle`, and (if practical)
 `VibeProvider` are deleted — this is a decision tool, not a permanent
