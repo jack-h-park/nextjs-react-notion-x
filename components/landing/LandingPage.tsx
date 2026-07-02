@@ -38,10 +38,12 @@ function LandingPageInner() {
       {/* Page paint layer — fixed, outside the smoother so it can never be
           transformed away; owns the base background + ambient mesh. */}
       <div className={styles.vibeBackdrop} aria-hidden="true" />
-      {/* Maximal: page-wide morphing field above the mesh, below content;
-          custom cursor above everything. Both self-bail on mobile/reduced
-          motion (maximal-lite = the boosted mesh alone). */}
-      {vibe === "maximal" && <MorphField />}
+      {/* Page-wide morph field above the mesh, below content. Maximal is the
+          bold set-piece (also replaces the hero ParticleField); atmospheric
+          gets a faint "ambient" variant so particles persist past the hero
+          without stealing focus. Both self-bail on mobile/reduced motion. */}
+      {vibe === "maximal" && <MorphField variant="bold" />}
+      {vibe === "atmospheric" && <MorphField variant="ambient" />}
       {vibe === "maximal" && <LandingCursor />}
       <VibeToggle />
       {/* ScrollSmoother structure — wrapper/content pair (storyboard §4). */}

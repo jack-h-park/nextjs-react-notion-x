@@ -175,12 +175,17 @@ comparison**, toggled at runtime:
 
 | Mode | Scope | Status |
 |------|-------|--------|
-| `atmospheric` (default) | Persistent brand-hued ambient mesh + film grain behind the whole page (`.vibeBackdrop`), gradient hairline card borders, brand-tinted layered shadows + hover lift, tinted ghost numerals | **Phase 1 — built** |
+| `atmospheric` (default) | Persistent brand-hued ambient mesh + film grain behind the whole page (`.vibeBackdrop`), gradient hairline card borders, brand-tinted layered shadows + hover lift, tinted ghost numerals, **plus a faint page-wide particle layer** (`MorphField` `variant="ambient"` — low alpha, gentle drift, only partly resolves) so particles persist past the hero without stealing focus; the hero `ParticleField` stays for the hero converge. Desktop-only; mobile/reduced-motion keep mesh + hero field | **Phase 1 + ambient field — built** |
 | `maximal` | ONE page-wide morphing WebGL field (`MorphField`: cloud → twisted ring → grid, driven by overall scroll progress — the "per-section scenes" promise on a single-canvas budget; the hero `ParticleField` is skipped to avoid a second canvas), pinned horizontal Selected Work gallery (layout flips only when JS sets `data-work-gallery`), custom dot+ring cursor with magnetic CTAs (`[data-magnetic]`), oversized editorial type + gradient ghost numerals, boosted mesh, page-tall column scrim for AA contrast. **Maximal-lite** (mobile / reduced-motion / no-WebGL): boosted mesh only, vertical stack, native cursor — self-contained, never falls back to atmospheric | **Phase 2 — built** |
 
 **Mechanics.** `VibeProvider` sets `data-vibe` on the landing root;
 persisted in `localStorage("landing-vibe")`; `?vibe=maximal` overrides (and
-persists) for shareable comparison. The floating `VibeToggle` and the
+persists) for shareable comparison. **Switching modes does a full reload
+with `?vibe=…`, not a live swap** — the two modes mount/tear down
+ScrollSmoother pins, a WebGL canvas and the custom cursor, and reverting
+that mid-scroll leaves pin-spacers/transforms in a bad state; a fresh load
+is the path that already works (and this is a decision tool, not a hot
+setting). The floating `VibeToggle` and the
 backdrop live *outside* the ScrollSmoother content (fixed elements inside
 the transformed wrapper would unfix). The page base paint moved from the
 smoother wrapper/content onto the fixed `.vibeBackdrop`, which also keeps

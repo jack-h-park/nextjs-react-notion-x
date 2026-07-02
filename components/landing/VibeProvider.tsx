@@ -9,7 +9,7 @@ import {
 
 export type LandingVibe = "atmospheric" | "maximal";
 
-const STORAGE_KEY = "landing-vibe";
+export const STORAGE_KEY = "landing-vibe";
 const DEFAULT_VIBE: LandingVibe = "atmospheric";
 
 type VibeContextValue = {

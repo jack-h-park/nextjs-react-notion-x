@@ -30,6 +30,8 @@ const VERTEX_SHADER = /* glsl */ `
   attribute vec3 aPosC;
   uniform float uTime;
   uniform float uProgress;
+  uniform float uDrift;
+  uniform float uMorph;
   uniform vec2 uParallax;
   varying vec3 vColor;
   varying float vAlpha;
@@ -37,11 +39,13 @@ const VERTEX_SHADER = /* glsl */ `
   void main() {
     vColor = aColor;
     // Piecewise morph: cloud -> ring over [0, .5], ring -> grid over [.5, 1].
-    float t1 = smoothstep(0.0, 0.5, uProgress);
-    float t2 = smoothstep(0.5, 1.0, uProgress);
+    // uMorph scales how far the shapes resolve — ambient stays cloud-like.
+    float prog = uProgress * uMorph;
+    float t1 = smoothstep(0.0, 0.5, prog);
+    float t2 = smoothstep(0.5, 1.0, prog);
     vec3 p = mix(mix(position, aPosB, t1), aPosC, t2);
     // Structure = stillness: drift fades as the grid locks in.
-    float drift = mix(1.0, 0.12, uProgress);
+    float drift = mix(1.0, 0.12, prog) * uDrift;
     p.y += sin(uTime * 0.26 + aPhase) * 0.5 * drift;
     p.x += cos(uTime * 0.16 + aPhase * 1.7) * 0.4 * drift;
     p.z += sin(uTime * 0.2 + aPhase * 2.3) * 0.35 * drift;
@@ -54,16 +58,32 @@ const VERTEX_SHADER = /* glsl */ `
 
 const FRAGMENT_SHADER = /* glsl */ `
   precision mediump float;
+  uniform float uAlpha;
   varying vec3 vColor;
   varying float vAlpha;
 
   void main() {
     float d = length(gl_PointCoord - 0.5);
-    float a = smoothstep(0.5, 0.1, d) * 0.42 * vAlpha;
+    float a = smoothstep(0.5, 0.1, d) * uAlpha * vAlpha;
     if (a < 0.01) discard;
     gl_FragColor = vec4(vColor, a);
   }
 `;
+
+/**
+ * "bold" is the maximal field (loud, fully morphs to the grid); "ambient"
+ * is the atmospheric persistence layer — faint, gentler drift, and it only
+ * partly resolves so it reads as a background cloud, not a set-piece.
+ */
+type MorphVariant = "bold" | "ambient";
+
+const VARIANT_CONFIG: Record<
+  MorphVariant,
+  { count: number; alpha: number; drift: number; morph: number; parallax: number }
+> = {
+  bold: { count: 2200, alpha: 0.42, drift: 1, morph: 1, parallax: 1 },
+  ambient: { count: 1500, alpha: 0.16, drift: 0.7, morph: 0.55, parallax: 0.45 },
+};
 
 function buildGeometry(count: number, container: HTMLElement): BufferGeometry {
   const stops = readBrandStops(container);
@@ -128,7 +148,7 @@ function buildGeometry(count: number, container: HTMLElement): BufferGeometry {
   return geometry;
 }
 
-export function MorphField() {
+export function MorphField({ variant = "bold" }: { variant?: MorphVariant }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
 
@@ -136,18 +156,21 @@ export function MorphField() {
     const container = containerRef.current;
     if (!container) return;
 
-    // Maximal-lite: mobile and reduced-motion get the CSS mesh only.
+    // Desktop-only. Mobile / reduced-motion get the CSS mesh only (maximal)
+    // or the hero ParticleField + mesh (atmospheric) — never this canvas.
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     if (reducedMotion || isMobile) return;
 
+    const config = VARIANT_CONFIG[variant];
+
     let renderer: WebGLRenderer;
     try {
       renderer = new WebGLRenderer({ alpha: true, antialias: false });
     } catch {
-      // No WebGL — the boosted CSS mesh remains the maximal background.
+      // No WebGL — the CSS mesh remains the background.
       return;
     }
 
@@ -155,7 +178,7 @@ export function MorphField() {
     const camera = new PerspectiveCamera(50, 1, 0.1, 80);
     camera.position.z = 13;
 
-    const geometry = buildGeometry(2200, container);
+    const geometry = buildGeometry(config.count, container);
     const material = new ShaderMaterial({
       vertexShader: VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
@@ -164,6 +187,9 @@ export function MorphField() {
       uniforms: {
         uTime: { value: 0 },
         uProgress: { value: 0 },
+        uDrift: { value: config.drift },
+        uMorph: { value: config.morph },
+        uAlpha: { value: config.alpha },
         uParallax: { value: [0, 0] },
       },
     });
@@ -183,8 +209,10 @@ export function MorphField() {
 
     const parallaxTarget = { x: 0, y: 0 };
     const onPointerMove = (event: PointerEvent) => {
-      parallaxTarget.x = (event.clientX / window.innerWidth - 0.5) * 2.2;
-      parallaxTarget.y = (0.5 - event.clientY / window.innerHeight) * 1.4;
+      parallaxTarget.x =
+        (event.clientX / window.innerWidth - 0.5) * 2.2 * config.parallax;
+      parallaxTarget.y =
+        (0.5 - event.clientY / window.innerHeight) * 1.4 * config.parallax;
     };
 
     let rafId = 0;
@@ -244,11 +272,12 @@ export function MorphField() {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, []);
+  }, [variant]);
 
   return (
     <div
       ref={containerRef}
+      data-variant={variant}
       className={`${styles.morphCanvas} ${ready ? styles.morphCanvasVisible : ""}`}
       aria-hidden="true"
     />
