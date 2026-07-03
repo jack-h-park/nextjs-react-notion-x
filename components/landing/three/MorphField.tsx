@@ -82,7 +82,10 @@ const VARIANT_CONFIG: Record<
   { count: number; alpha: number; drift: number; morph: number; parallax: number }
 > = {
   bold: { count: 2200, alpha: 0.42, drift: 1, morph: 1, parallax: 1 },
-  ambient: { count: 1500, alpha: 0.1, drift: 0.7, morph: 0.55, parallax: 0.45 },
+  // Ambient is a whisper: fewer, fainter points so the field never competes
+  // with body text even where the cloud is densest (behind the full-width
+  // Chain). The mesh + tint carry the atmosphere; particles are an accent.
+  ambient: { count: 950, alpha: 0.05, drift: 0.7, morph: 0.55, parallax: 0.45 },
 };
 
 function buildGeometry(count: number, container: HTMLElement): BufferGeometry {
