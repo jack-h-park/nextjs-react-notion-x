@@ -928,11 +928,11 @@ a:focus-visible .miniUnderline {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  opacity: 0;
-  transform: translateX(6px);
+  /* Every chapter stays faintly legible so the rail reads as a set; the
+     active one and hover lift to full. */
+  opacity: 0.4;
   transition:
     opacity 0.25s ease,
-    transform 0.25s ease,
     color 0.25s ease;
 }
 
@@ -940,7 +940,6 @@ a:focus-visible .miniUnderline {
 .navItem:focus-visible .navLabel,
 .navItemActive .navLabel {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .navItemActive .navLabel {
@@ -951,17 +950,17 @@ a:focus-visible .miniUnderline {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  border: 1px solid var(--border-default);
-  background: transparent;
+  border: none;
+  /* Faint filled dot so every stop is visible, not a barely-there ring. */
+  background: color-mix(in srgb, var(--text-tertiary) 55%, transparent);
   transition:
     background 0.25s ease,
-    border-color 0.25s ease,
     transform 0.25s ease;
 }
 
 .navItem:hover .navDot,
 .navItem:focus-visible .navDot {
-  border-color: var(--text-secondary);
+  background: var(--text-secondary);
 }
 
 /* Active dot = the brand mini-gradient (an interaction, within budget). */
