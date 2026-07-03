@@ -13,13 +13,13 @@ import styles from "../landing.module.css";
 import { readBrandStops, sampleGradient } from "./gradientStops";
 
 /**
- * Maximal-mode page field: ONE fixed full-viewport canvas whose particle
- * cloud morphs with overall page progress — scattered cloud (hero) → twisted
- * ring (mid-page, the chain) → precise grid (end, structure achieved). The
- * "per-section WebGL" promise with a single-canvas budget (storyboard §8).
+ * Persistent page-wide atmosphere: ONE fixed full-viewport canvas whose
+ * particle cloud drifts and slowly resolves with overall page progress —
+ * scattered cloud (hero) → twisted ring (mid-page) → looser grid (end).
+ * A faint accent behind the whole page, above the CSS mesh, below content.
  *
- * Desktop-only and skipped under prefers-reduced-motion — the maximal-lite
- * fallback is the boosted CSS mesh in .vibeBackdrop.
+ * Desktop-only and skipped under prefers-reduced-motion; the hero
+ * ParticleField + CSS mesh carry the atmosphere there.
  */
 
 const VERTEX_SHADER = /* glsl */ `
@@ -70,22 +70,17 @@ const FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-/**
- * "bold" is the maximal field (loud, fully morphs to the grid); "ambient"
- * is the atmospheric persistence layer — faint, gentler drift, and it only
- * partly resolves so it reads as a background cloud, not a set-piece.
- */
-type MorphVariant = "bold" | "ambient";
-
-const VARIANT_CONFIG: Record<
-  MorphVariant,
-  { count: number; alpha: number; drift: number; morph: number; parallax: number }
-> = {
-  bold: { count: 2200, alpha: 0.42, drift: 1, morph: 1, parallax: 1 },
-  // Ambient is a whisper: fewer, fainter points so the field never competes
-  // with body text even where the cloud is densest (behind the full-width
-  // Chain). The mesh + tint carry the atmosphere; particles are an accent.
-  ambient: { count: 950, alpha: 0.05, drift: 0.7, morph: 0.55, parallax: 0.45 },
+// The atmospheric persistence layer — a whisper: fewer, fainter points so
+// the field never competes with body text even where the cloud is densest
+// (behind the full-width Chain). The mesh + tint carry the atmosphere;
+// particles are an accent, only partly resolving so it reads as a
+// background cloud rather than a set-piece.
+const FIELD = {
+  count: 950,
+  alpha: 0.05,
+  drift: 0.7,
+  morph: 0.55,
+  parallax: 0.45,
 };
 
 function buildGeometry(count: number, container: HTMLElement): BufferGeometry {
@@ -151,7 +146,7 @@ function buildGeometry(count: number, container: HTMLElement): BufferGeometry {
   return geometry;
 }
 
-export function MorphField({ variant = "bold" }: { variant?: MorphVariant }) {
+export function MorphField() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
 
@@ -159,15 +154,15 @@ export function MorphField({ variant = "bold" }: { variant?: MorphVariant }) {
     const container = containerRef.current;
     if (!container) return;
 
-    // Desktop-only. Mobile / reduced-motion get the CSS mesh only (maximal)
-    // or the hero ParticleField + mesh (atmospheric) — never this canvas.
+    // Desktop-only. Mobile / reduced-motion get the hero ParticleField +
+    // CSS mesh instead — never this canvas.
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     if (reducedMotion || isMobile) return;
 
-    const config = VARIANT_CONFIG[variant];
+    const config = FIELD;
 
     let renderer: WebGLRenderer;
     try {
@@ -275,12 +270,11 @@ export function MorphField({ variant = "bold" }: { variant?: MorphVariant }) {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [variant]);
+  }, []);
 
   return (
     <div
       ref={containerRef}
-      data-variant={variant}
       className={`${styles.morphCanvas} ${ready ? styles.morphCanvasVisible : ""}`}
       aria-hidden="true"
     />

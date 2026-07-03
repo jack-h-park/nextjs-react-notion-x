@@ -4,8 +4,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { useEffect, useRef } from "react";
 
-import type { LandingVibe } from "./VibeProvider";
-
 /**
  * Scroll-motion layer for the landing page (storyboard §4).
  *
@@ -15,12 +13,8 @@ import type { LandingVibe } from "./VibeProvider";
  *
  * Desktop additionally gets the pinned Chain set-piece and data-speed/lag
  * parallax depth; mobile keeps native scroll with entrance tweens only.
- *
- * The vibe is a dependency: toggling it reverts the whole GSAP context and
- * rebuilds (maximal swaps the Selected Work entrances for the pinned
- * horizontal gallery, storyboard §8).
  */
-export function useLandingMotion(vibe: LandingVibe) {
+export function useLandingMotion() {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,8 +45,7 @@ export function useLandingMotion(vibe: LandingVibe) {
           // Wheel only (smoothTouch stays 0) so mobile keeps native scroll.
           // Parallax effects are desktop-only: on touch the depth layer
           // reads as jitter rather than depth.
-          // A vibe toggle re-runs this whole effect, so kill any smoother
-          // left from the previous run before creating the new one.
+          // Kill any smoother left from a prior run (Fast Refresh) first.
           ScrollSmoother.get()?.kill();
 
           // ── Per-section atmosphere (storyboard §8) ──────────────────
@@ -308,47 +301,18 @@ export function useLandingMotion(vibe: LandingVibe) {
             },
           });
 
-          // ── Selected Work ────────────────────────────────────────────
-          const workSection = root.querySelector<HTMLElement>(
-            '[data-anim="work-section"]',
-          );
-          const workList = root.querySelector<HTMLElement>(
-            '[data-anim="work-list"]',
-          );
-          if (vibe === "maximal" && isDesktop && workSection && workList) {
-            // Maximal: pinned horizontal gallery. The layout only goes
-            // horizontal once this attribute lands (CSS keys off it), so
-            // reduced-motion / no-JS keep the vertical stack.
-            workSection.dataset.workGallery = "";
-            const distance = () =>
-              Math.max(workList.scrollWidth - window.innerWidth + 120, 0);
-            gsap.to(workList, {
-              x: () => -distance(),
-              ease: "none",
-              scrollTrigger: {
-                trigger: workSection,
-                start: "top top",
-                end: () => `+=${distance()}`,
-                pin: true,
-                scrub: 1,
-                anticipatePin: 1,
-                invalidateOnRefresh: true,
-              },
+          // ── Selected Work: vertical stack, settle-in entrances ──────
+          for (const card of gsap.utils.toArray<HTMLElement>(
+            '[data-anim="work-card"]',
+          )) {
+            gsap.from(card, {
+              autoAlpha: 0,
+              y: 36,
+              scale: 0.985,
+              duration: 0.7,
+              ease: "power3.out",
+              scrollTrigger: { trigger: card, start: "top 82%" },
             });
-          } else {
-            // Atmospheric / mobile: vertical stack with settle-in entrances.
-            for (const card of gsap.utils.toArray<HTMLElement>(
-              '[data-anim="work-card"]',
-            )) {
-              gsap.from(card, {
-                autoAlpha: 0,
-                y: 36,
-                scale: 0.985,
-                duration: 0.7,
-                ease: "power3.out",
-                scrollTrigger: { trigger: card, start: "top 82%" },
-              });
-            }
           }
           for (const stat of gsap.utils.toArray<HTMLElement>("[data-count]")) {
             const raw = stat.dataset.value ?? "0";
@@ -441,17 +405,13 @@ export function useLandingMotion(vibe: LandingVibe) {
           disposed = true;
           for (const split of splits) split.revert();
           ctx.revert();
-          // ctx.revert() unpins, but the layout attribute is ours to clear.
-          root
-            .querySelector('[data-work-gallery]')
-            ?.removeAttribute("data-work-gallery");
           ScrollSmoother.get()?.kill();
         };
       },
     );
 
     return () => mm.revert();
-  }, [vibe]);
+  }, []);
 
   return rootRef;
 }

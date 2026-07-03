@@ -39,7 +39,7 @@ export function SectionNav() {
   const [active, setActive] = useState("hero");
 
   useEffect(() => {
-    const root = document.querySelector<HTMLElement>("[data-vibe]");
+    const root = document.querySelector<HTMLElement>('[data-theme="jp"]');
     if (!root) return;
     const update = () => setActive(root.dataset.atmo || "hero");
     update();

@@ -167,36 +167,36 @@ Source: `closing`.
 2. ~~`/landing` → `/` swap timing~~ **Done (2026-06-16):** the landing owns `/`; the Notion studio home moved to `/studio` (`pages/studio.tsx`, root URL re-homed in `lib/map-page-url.ts`); `/landing` 301-redirects to `/`; `noindex` removed; `/studio` added to the sitemap.
 3. OG image per brand §7.3 — after visual lock (Phase 5).
 
-## 8 · Vibe Comparison Mode (temporary, 2026-07-02 →)
+## 8 · Atmospheric direction (chosen 2026-07-03)
 
-The body of the page read as "plain" against the award-worthy brief, so two
-richer visual directions are being built side-by-side for a **live scroll
-comparison**, toggled at runtime:
+The body read as "plain" against the award-worthy brief, so two richer
+directions — **atmospheric** and **maximal** — were built side-by-side
+behind a runtime toggle for a live scroll comparison. The owner picked
+**atmospheric**; maximal was removed and the toggle deleted. The full
+maximal work (page-wide morphing WebGL field, pinned horizontal Selected
+Work gallery, custom cursor + magnetic CTAs, oversized type) is preserved
+at the git tag **`landing-maximal-archive`** — recover by cherry-picking
+from there if it's ever wanted.
 
-| Mode | Scope | Status |
-|------|-------|--------|
-| `atmospheric` (default) | Persistent brand-hued ambient mesh + film grain behind the whole page (`.vibeBackdrop`), gradient hairline card borders, brand-tinted layered shadows + hover lift, tinted ghost numerals, **plus a faint page-wide particle layer** (`MorphField` `variant="ambient"` — low alpha, gentle drift, only partly resolves) so particles persist past the hero without stealing focus; the hero `ParticleField` stays for the hero converge. Desktop-only; mobile/reduced-motion keep mesh + hero field | **Phase 1 + ambient field — built** |
-| `maximal` | ONE page-wide morphing WebGL field (`MorphField`: cloud → twisted ring → grid, driven by overall scroll progress — the "per-section scenes" promise on a single-canvas budget; the hero `ParticleField` is skipped to avoid a second canvas), pinned horizontal Selected Work gallery (layout flips only when JS sets `data-work-gallery`), custom dot+ring cursor with magnetic CTAs (`[data-magnetic]`), oversized editorial type + gradient ghost numerals, boosted mesh, page-tall column scrim for AA contrast. **Maximal-lite** (mobile / reduced-motion / no-WebGL): boosted mesh only, vertical stack, native cursor — self-contained, never falls back to atmospheric | **Phase 2 — built** |
+**What atmospheric is (now the design, no longer scoped to a mode):**
+- Fixed paint layer `.vibeBackdrop` — base page color + a brand-hued
+  ambient mesh (slow counter-drift) + colorless film grain. Moving the page
+  paint here (off the smoother wrapper/content) also keeps the below-the-
+  fold dark-mode guarantee.
+- `MorphField` — one fixed page-wide particle field, a faint whisper
+  (α 0.05, ~950 pts, partial morph) so it never competes with text; the
+  hero keeps its own crisp `ParticleField`. Desktop-only; mobile /
+  reduced-motion / no-WebGL fall back to mesh + hero field.
+- Card depth (gradient hairline border + brand-tinted layered shadow +
+  hover lift), tinted ghost numerals, per-section hue shift, readability
+  scrim behind `<main>`.
 
-**Mechanics.** `VibeProvider` sets `data-vibe` on the landing root;
-persisted in `localStorage("landing-vibe")`; `?vibe=maximal` overrides (and
-persists) for shareable comparison. **Switching modes does a full reload
-with `?vibe=…`, not a live swap** — the two modes mount/tear down
-ScrollSmoother pins, a WebGL canvas and the custom cursor, and reverting
-that mid-scroll leaves pin-spacers/transforms in a bad state; a fresh load
-is the path that already works (and this is a decision tool, not a hot
-setting). The floating `VibeToggle` and the
-backdrop live *outside* the ScrollSmoother content (fixed elements inside
-the transformed wrapper would unfix). The page base paint moved from the
-smoother wrapper/content onto the fixed `.vibeBackdrop`, which also keeps
-the below-the-fold dark-mode guarantee.
-
-**Deliberate brand deviations (scoped to vibe modes, documented here):**
-ambient brand color as *atmosphere* stretches the "gradient is a signature,
-not a wallpaper" rule; card borders use a gradient hairline outside the
-"interactions only" budget; film grain adds texture where the base system
-is flat. Each mode must keep AA text contrast and `prefers-reduced-motion`
-fallbacks (mesh drift pauses; static gradients remain).
+**Deliberate brand deviations (kept, documented here):** ambient brand
+color as *atmosphere* stretches "gradient is a signature, not a wallpaper";
+card borders use a gradient hairline outside the "interactions only"
+budget; film grain adds texture where the base system is flat. AA text
+contrast and `prefers-reduced-motion` fallbacks are preserved (mesh drift
+pauses, particle field bails, static gradients remain).
 
 **Scene 3 inversion dropped.** The Discipline of No no longer forces the
 dark band (§3). Over the new continuous atmosphere a dark scrim only reads
