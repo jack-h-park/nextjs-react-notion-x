@@ -389,13 +389,16 @@ export function useLandingMotion(vibe: LandingVibe) {
           });
 
           // ── Per-section atmosphere (storyboard §8) ──────────────────
-          // Created LAST so positions include the pin spacers. data-atmo on
-          // the root drives the ambient tint hue (CSS crossfade), the rail's
-          // active chapter, and the Discipline calm. Active = the section
-          // crossing the upper-middle band; "top 60%" is reachable for the
-          // closing (which tops out ~44% at max scroll) so it owns its own
-          // chapter instead of being absorbed into Trajectory.
-          const atmoSections = [
+          // A deterministic scroll-spy, NOT competing per-section triggers:
+          // overlapping onEnter/onEnterBack ranges made the closing flicker
+          // and Trajectory stick. On every scroll we pick the LAST section
+          // whose top has passed a reference line — exactly one active, no
+          // fight. data-atmo drives the tint hue, the rail, and the calm.
+          //
+          // The line sits at 55% of the viewport: below the closing
+          // headline's max-scroll top (~44%), so Contact reliably owns the
+          // bottom instead of being absorbed into Trajectory.
+          const atmoEls = [
             { key: "hero", sel: '[data-anim="hero-headline"]' },
             { key: "chain", sel: '[data-anim="chain-section"]' },
             { key: "pillars", sel: '[data-anim="pillar-card"]' },
@@ -403,31 +406,31 @@ export function useLandingMotion(vibe: LandingVibe) {
             { key: "work", sel: '[data-anim="work-section"]' },
             { key: "trajectory", sel: '[data-anim="timeline-wrap"]' },
             { key: "closing", sel: '[data-anim="closing-headline"]' },
-          ];
-          for (const { key, sel } of atmoSections) {
-            const el = root.querySelector(sel);
-            if (!el) continue;
-            ScrollTrigger.create({
-              trigger: el,
-              start: "top 60%",
-              end: "bottom 40%",
-              onEnter: () => (root.dataset.atmo = key),
-              onEnterBack: () => (root.dataset.atmo = key),
-            });
-          }
+          ]
+            .map(({ key, sel }) => ({
+              key,
+              el: root.querySelector<HTMLElement>(sel),
+            }))
+            .filter((s): s is { key: string; el: HTMLElement } => !!s.el);
 
-          // Safety net: guarantee Contact owns the very bottom even on short
-          // viewports where the closing headline can't reach the 60% line.
-          // Scroll-up out of the bottom is handled by the section triggers'
-          // onEnterBack above.
-          const smoothContent = root.querySelector("[data-smooth-content]");
-          if (smoothContent) {
-            ScrollTrigger.create({
-              trigger: smoothContent,
-              start: "bottom bottom",
-              onEnter: () => (root.dataset.atmo = "closing"),
-            });
-          }
+          const updateAtmo = () => {
+            const line = window.innerHeight * 0.55;
+            let active = atmoEls[0]?.key ?? "hero";
+            for (const s of atmoEls) {
+              if (s.el.getBoundingClientRect().top <= line) active = s.key;
+              else break; // sections are in order; the rest are lower still
+            }
+            if (root.dataset.atmo !== active) root.dataset.atmo = active;
+          };
+
+          ScrollTrigger.create({
+            trigger: "[data-smooth-content]",
+            start: "top top",
+            end: "bottom bottom",
+            onUpdate: updateAtmo,
+            onRefresh: updateAtmo,
+          });
+          updateAtmo();
 
           // Recompute every trigger's pixel positions now that the pins,
           // count-ups and atmo watchers all exist.
