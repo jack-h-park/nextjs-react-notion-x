@@ -63,9 +63,13 @@ export function useLandingMotion(vibe: LandingVibe) {
 
           // ── Per-section atmosphere (storyboard §8) ──────────────────
           // data-atmo on the root drives the ambient tint's hue (CSS
-          // crossfade) and calms the particle field through Discipline —
-          // section rhythm without hard boundaries. The section whose body
-          // spans the viewport centre owns the temperature.
+          // crossfade), the section rail's active state, and the Discipline
+          // calm. The section entering the lower-middle owns the chapter.
+          //
+          // start/end are "top 62%"/"bottom 38%" (not center): the LAST
+          // section can never reach viewport centre at max scroll, so a
+          // "top center" trigger would never fire and the rail would stay
+          // stuck on Trajectory. 62% is reachable as the closing scrolls in.
           root.dataset.atmo = "hero";
           const atmoSections = [
             { key: "hero", sel: '[data-anim="hero-headline"]' },
@@ -81,8 +85,8 @@ export function useLandingMotion(vibe: LandingVibe) {
             if (!el) continue;
             ScrollTrigger.create({
               trigger: el,
-              start: "top center",
-              end: "bottom center",
+              start: "top 62%",
+              end: "bottom 38%",
               onEnter: () => (root.dataset.atmo = key),
               onEnterBack: () => (root.dataset.atmo = key),
             });
