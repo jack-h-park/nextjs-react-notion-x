@@ -80,12 +80,24 @@ export function useLandingMotion(vibe: LandingVibe) {
             }))
             .filter((s): s is { key: string; el: HTMLElement } => !!s.el);
 
+          // The last section (closing + footer) is shorter than a tall
+          // viewport, so its top can never reach the 55% line — the spy
+          // would stay on Trajectory forever. When the footer is fully in
+          // view we've hit the page bottom, so the last chapter owns it.
+          const footerEl = root.querySelector("footer");
+
           const updateAtmo = () => {
             const line = window.innerHeight * 0.55;
             let active = atmoEls[0]?.key ?? "hero";
             for (const s of atmoEls) {
               if (s.el.getBoundingClientRect().top <= line) active = s.key;
               else break; // sections are in order; the rest are lower still
+            }
+            if (
+              footerEl &&
+              footerEl.getBoundingClientRect().bottom <= window.innerHeight + 4
+            ) {
+              active = atmoEls.at(-1)?.key ?? active;
             }
             if (root.dataset.atmo !== active) root.dataset.atmo = active;
           };
