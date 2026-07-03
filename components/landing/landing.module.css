@@ -633,7 +633,15 @@ a:focus-visible .miniUnderline {
 .closing {
   composes: section;
   text-align: center;
-  padding-top: 160px;
+  /* Full-height outro: the invitation fills its own screen (a proper
+     final beat), and the closing's top can scroll up so the Contact
+     chapter activates by the normal line rule (the footer strip sits
+     below). */
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .closingHeadline {
