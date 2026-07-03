@@ -54,19 +54,52 @@ export function useLandingMotion(vibe: LandingVibe) {
           // A vibe toggle re-runs this whole effect, so kill any smoother
           // left from the previous run before creating the new one.
           ScrollSmoother.get()?.kill();
+
+          // ── Per-section atmosphere (storyboard §8) ──────────────────
+          // A deterministic scroll-spy: on each scroll, pick the LAST
+          // section whose top has passed a 55%-viewport line — exactly one
+          // active chapter, no fight (competing per-section triggers made
+          // the closing flicker and Trajectory stick). data-atmo drives the
+          // tint hue, the rail, and the Discipline calm. 55% sits below the
+          // closing headline's max-scroll top (~44%), so Contact owns the
+          // bottom. It hangs on the smoother's own onUpdate — a ScrollTrigger
+          // whose trigger is the transformed content jams scrolling on tall
+          // viewports.
+          const atmoEls = [
+            { key: "hero", sel: '[data-anim="hero-headline"]' },
+            { key: "chain", sel: '[data-anim="chain-section"]' },
+            { key: "pillars", sel: '[data-anim="pillar-card"]' },
+            { key: "discipline", sel: '[data-anim="scope-statement"]' },
+            { key: "work", sel: '[data-anim="work-section"]' },
+            { key: "trajectory", sel: '[data-anim="timeline-wrap"]' },
+            { key: "closing", sel: '[data-anim="closing-headline"]' },
+          ]
+            .map(({ key, sel }) => ({
+              key,
+              el: root.querySelector<HTMLElement>(sel),
+            }))
+            .filter((s): s is { key: string; el: HTMLElement } => !!s.el);
+
+          const updateAtmo = () => {
+            const line = window.innerHeight * 0.55;
+            let active = atmoEls[0]?.key ?? "hero";
+            for (const s of atmoEls) {
+              if (s.el.getBoundingClientRect().top <= line) active = s.key;
+              else break; // sections are in order; the rest are lower still
+            }
+            if (root.dataset.atmo !== active) root.dataset.atmo = active;
+          };
+
+          root.dataset.atmo = "hero";
+
           ScrollSmoother.create({
             wrapper: "[data-smooth-wrapper]",
             content: "[data-smooth-content]",
             smooth: 1.2,
             effects: isDesktop,
+            onUpdate: updateAtmo,
           });
-
-          // Per-section atmosphere is set up at the END of this context,
-          // after the pins — a pin adds a spacer that shifts every trigger
-          // below it, so atmo triggers created before the pins would read
-          // stale positions (the closing never firing → rail stuck on
-          // Trajectory). Init the first chapter here to avoid a null state.
-          root.dataset.atmo = "hero";
+          updateAtmo();
 
           // ── Hero: eyebrow → headline lines → supporting items ──────
           const headline = root.querySelector<HTMLElement>(
@@ -388,56 +421,8 @@ export function useLandingMotion(vibe: LandingVibe) {
             },
           });
 
-          // ── Per-section atmosphere (storyboard §8) ──────────────────
-          // A deterministic scroll-spy, NOT competing per-section triggers:
-          // overlapping onEnter/onEnterBack ranges made the closing flicker
-          // and Trajectory stick. On every scroll we pick the LAST section
-          // whose top has passed a reference line — exactly one active, no
-          // fight. data-atmo drives the tint hue, the rail, and the calm.
-          //
-          // The line sits at 55% of the viewport: below the closing
-          // headline's max-scroll top (~44%), so Contact reliably owns the
-          // bottom instead of being absorbed into Trajectory.
-          const atmoEls = [
-            { key: "hero", sel: '[data-anim="hero-headline"]' },
-            { key: "chain", sel: '[data-anim="chain-section"]' },
-            { key: "pillars", sel: '[data-anim="pillar-card"]' },
-            { key: "discipline", sel: '[data-anim="scope-statement"]' },
-            { key: "work", sel: '[data-anim="work-section"]' },
-            { key: "trajectory", sel: '[data-anim="timeline-wrap"]' },
-            { key: "closing", sel: '[data-anim="closing-headline"]' },
-          ]
-            .map(({ key, sel }) => ({
-              key,
-              el: root.querySelector<HTMLElement>(sel),
-            }))
-            .filter((s): s is { key: string; el: HTMLElement } => !!s.el);
-
-          const updateAtmo = () => {
-            const line = window.innerHeight * 0.55;
-            let active = atmoEls[0]?.key ?? "hero";
-            for (const s of atmoEls) {
-              if (s.el.getBoundingClientRect().top <= line) active = s.key;
-              else break; // sections are in order; the rest are lower still
-            }
-            if (root.dataset.atmo !== active) root.dataset.atmo = active;
-          };
-
-          // The spy reads live getBoundingClientRect on each update, so it
-          // needs no precomputed positions — and must NOT call
-          // ScrollTrigger.refresh() here: a manual refresh mid-setup
-          // corrupts the Chain pin's spacer under ScrollSmoother and blocks
-          // scrolling past Selected Work (a viewport resize would silently
-          // fix it, which is exactly the symptom). ScrollSmoother runs its
-          // own refresh after this context.
-          ScrollTrigger.create({
-            trigger: "[data-smooth-content]",
-            start: "top top",
-            end: "bottom bottom",
-            onUpdate: updateAtmo,
-            onRefresh: updateAtmo,
-          });
-          updateAtmo();
+          // (Per-section atmosphere scroll-spy is set up at the top of this
+          // context, on the ScrollSmoother onUpdate callback.)
         }, root);
 
         return () => {
