@@ -423,6 +423,13 @@ export function useLandingMotion(vibe: LandingVibe) {
             if (root.dataset.atmo !== active) root.dataset.atmo = active;
           };
 
+          // The spy reads live getBoundingClientRect on each update, so it
+          // needs no precomputed positions — and must NOT call
+          // ScrollTrigger.refresh() here: a manual refresh mid-setup
+          // corrupts the Chain pin's spacer under ScrollSmoother and blocks
+          // scrolling past Selected Work (a viewport resize would silently
+          // fix it, which is exactly the symptom). ScrollSmoother runs its
+          // own refresh after this context.
           ScrollTrigger.create({
             trigger: "[data-smooth-content]",
             start: "top top",
@@ -431,10 +438,6 @@ export function useLandingMotion(vibe: LandingVibe) {
             onRefresh: updateAtmo,
           });
           updateAtmo();
-
-          // Recompute every trigger's pixel positions now that the pins,
-          // count-ups and atmo watchers all exist.
-          ScrollTrigger.refresh();
         }, root);
 
         return () => {
