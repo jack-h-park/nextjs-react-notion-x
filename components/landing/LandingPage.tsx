@@ -56,7 +56,7 @@ function LandingPageInner() {
       <div data-smooth-wrapper className={styles.smoothWrapper}>
         <div data-smooth-content className={styles.smoothContent}>
           <Hero />
-          <main>
+          <main className={styles.landingMain}>
             <ChainSection />
             <PillarsGrid />
             <ScopeDiscipline />
