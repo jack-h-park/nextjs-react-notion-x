@@ -23,58 +23,7 @@ import {
   buildNotionSourceMetadata,
   extractNotionMetadata,
 } from "../notion-metadata";
-
-/**
- * Notion sometimes returns doubly-nested record entries:
- * recordMap.block[id].value = { role, value: Block } instead of the Block
- * itself. notion-utils helpers (getPageContentBlockIds, getBlockTitle, ...)
- * read `.value` directly, so without normalization content traversal silently
- * yields nothing and every page ingests as an empty "Untitled" document.
- * Unwrap once at the fetch boundary so all downstream consumers see the
- * canonical shape. https://github.com/NotionX/react-notion-x/issues/682
- */
-function unwrapRecordEntry<T extends { value?: unknown }>(entry: T): T {
-  let v: unknown = entry.value;
-  while (
-    v &&
-    typeof v === "object" &&
-    !(v as Record<string, unknown>).id &&
-    (v as Record<string, unknown>).value
-  ) {
-    v = (v as Record<string, unknown>).value;
-  }
-  if (v === entry.value) return entry;
-  return { ...entry, value: v };
-}
-
-function normalizeRecordTable<T extends Record<string, { value?: unknown }>>(
-  table: T | undefined,
-): T | undefined {
-  if (!table) return table;
-  let changed = false;
-  const next: Record<string, unknown> = {};
-  for (const [id, entry] of Object.entries(table)) {
-    const unwrapped = unwrapRecordEntry(entry);
-    if (unwrapped !== entry) changed = true;
-    next[id] = unwrapped;
-  }
-  return changed ? (next as T) : table;
-}
-
-export function normalizeNotionRecordMap(
-  recordMap: ExtendedRecordMap,
-): ExtendedRecordMap {
-  const block = normalizeRecordTable(recordMap.block);
-  const collection = normalizeRecordTable(recordMap.collection);
-  if (block === recordMap.block && collection === recordMap.collection) {
-    return recordMap;
-  }
-  return {
-    ...recordMap,
-    block: block ?? recordMap.block,
-    collection: collection ?? recordMap.collection,
-  };
-}
+import { normalizeNotionRecordMap } from "../notion-record-value";
 
 /**
  * ID-sensitive ingestion path: doc_id/raw_doc_id must always come from
