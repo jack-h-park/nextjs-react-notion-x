@@ -5,7 +5,7 @@ import type {
 import type { ChainRunContext } from "@/lib/server/langchain/runnable-config";
 import type { buildTelemetryConfigSnapshot } from "@/lib/server/telemetry/telemetry-config-snapshot";
 import { createObservation, type LangfuseTrace } from "@/lib/langfuse";
-import { emitAnswerGeneration } from "@/lib/server/telemetry/langfuse-generations";
+import { emitAnswerSummarySpan } from "@/lib/server/telemetry/langfuse-answer-summary";
 import {
   buildSafeTraceInputSummary,
   buildSafeTraceOutputSummary,
@@ -35,7 +35,7 @@ export type ChatTraceState = {
   errorCategory: string | null;
   llmGenerationStartMs: number | null;
   llmGenerationEndMs: number | null;
-  generationEmitted: boolean;
+  answerSummarySpanEmitted: boolean;
   chainRunContext: ChainRunContext | null;
   detailLevel: string | null;
   provider: string | null;
@@ -71,7 +71,7 @@ export function createChatTraceState(): ChatTraceState {
     errorCategory: null,
     llmGenerationStartMs: null,
     llmGenerationEndMs: null,
-    generationEmitted: false,
+    answerSummarySpanEmitted: false,
     chainRunContext: null,
     detailLevel: null,
     provider: null,
@@ -206,13 +206,13 @@ export function finalizeChatTrace(
 
   if (
     state.trace &&
-    !state.generationEmitted &&
+    !state.answerSummarySpanEmitted &&
     state.llmGenerationStartMs !== null &&
     state.outputSummary &&
     state.routingDecision &&
     state.guardrails
   ) {
-    state.generationEmitted = true;
+    state.answerSummarySpanEmitted = true;
     const outputSummary = state.outputSummary;
     const ragConfig =
       state.routingDecision.intent === "knowledge"
@@ -224,7 +224,7 @@ export function finalizeChatTrace(
             hydeEnabled: state.hydeEnabled ?? false,
           }
         : null;
-    void emitAnswerGeneration({
+    void emitAnswerSummarySpan({
       trace: state.trace,
       requestId: state.requestId ?? state.chainRunContext?.requestId ?? null,
       intent: state.routingDecision.intent,
