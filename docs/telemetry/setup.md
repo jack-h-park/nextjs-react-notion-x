@@ -23,7 +23,7 @@ Environment column legend: **App-server** = prod/dev Next.js server runtime · *
 | `LANGFUSE_SECRET_KEY` | API secret | App-server + Digest | Required for any Langfuse |
 | `LANGFUSE_BASE_URL` | Region host, e.g. `https://us.cloud.langfuse.com` | App-server + Digest | Required (region-specific) |
 | `LANGFUSE_INCLUDE_PII` | Store chat transcripts (question **and** answer) on traces when `true` | App-server | Optional (default false); pair with the recording notice in the chat UI |
-| `LANGFUSE_PROJECT_ID` | Project id for building trace deep links in notifications | App-server | Optional |
+| `LANGFUSE_PROJECT_ID` | Project id for trace deep links in notifications | App-server | Optional — auto-resolved from the API keys; set only to override |
 | `LANGFUSE_ENV_TAG` | Overrides the `env:` trace tag | App-server | Optional |
 | `LANGFUSE_ATTACH_PROVIDER_METADATA` | Attach provider metadata to traces | App-server | Optional |
 | `LANGFUSE_TIMEOUT` | Client timeout (ms) | App-server | Optional |

@@ -9,6 +9,45 @@ export type ChatStartedNotice = {
 
 const QUESTION_PREVIEW_CHARS = 200;
 
+// Langfuse project id for trace deep links. Resolved once per process from the
+// API keys via /api/public/projects (the keys are project-scoped, so the call
+// returns exactly the owning project). LANGFUSE_PROJECT_ID overrides when set;
+// `null` marks a failed resolution so we don't retry on every message.
+let cachedProjectId: string | null | undefined;
+
+async function resolveLangfuseProjectId(): Promise<string | null> {
+  const fromEnv = process.env.LANGFUSE_PROJECT_ID;
+  if (fromEnv) {
+    return fromEnv;
+  }
+  if (cachedProjectId !== undefined) {
+    return cachedProjectId;
+  }
+  const baseUrl = process.env.LANGFUSE_BASE_URL;
+  const publicKey = process.env.LANGFUSE_PUBLIC_KEY;
+  const secretKey = process.env.LANGFUSE_SECRET_KEY;
+  if (!baseUrl || !publicKey || !secretKey) {
+    cachedProjectId = null;
+    return null;
+  }
+  try {
+    const auth = Buffer.from(`${publicKey}:${secretKey}`).toString("base64");
+    const res = await fetch(
+      `${baseUrl.replace(/\/$/, "")}/api/public/projects`,
+      { headers: { Authorization: `Basic ${auth}` } },
+    );
+    if (!res.ok) {
+      cachedProjectId = null;
+      return null;
+    }
+    const body = (await res.json()) as { data?: Array<{ id?: string }> };
+    cachedProjectId = body.data?.[0]?.id ?? null;
+  } catch {
+    cachedProjectId = null;
+  }
+  return cachedProjectId;
+}
+
 /**
  * Fire-and-forget Telegram notification when a visitor starts a new chat.
  *
@@ -34,43 +73,46 @@ export function notifyChatStarted(notice: ChatStartedNotice): void {
       ? `${notice.question.slice(0, QUESTION_PREVIEW_CHARS)}…`
       : notice.question;
 
-  // Deep-link to the Langfuse trace when the project id is configured;
-  // otherwise fall back to the bare trace id.
-  const baseUrl = process.env.LANGFUSE_BASE_URL;
-  const projectId = process.env.LANGFUSE_PROJECT_ID;
-  const traceUrl =
-    notice.traceId && baseUrl && projectId
-      ? `${baseUrl.replace(/\/$/, "")}/project/${projectId}/traces/${notice.traceId}`
-      : null;
+  void (async () => {
+    // Deep-link to the Langfuse trace; the project id is auto-resolved from
+    // the API keys (or LANGFUSE_PROJECT_ID when set). Falls back to the bare
+    // trace id when no link can be built.
+    const baseUrl = process.env.LANGFUSE_BASE_URL;
+    const projectId = notice.traceId ? await resolveLangfuseProjectId() : null;
+    const traceUrl =
+      notice.traceId && baseUrl && projectId
+        ? `${baseUrl.replace(/\/$/, "")}/project/${projectId}/traces/${notice.traceId}`
+        : null;
 
-  const text = [
-    "💬 New JackGPT chat",
-    `Q: ${preview}`,
-    notice.sessionId ? `Session: ${notice.sessionId}` : null,
-    traceUrl ?? (notice.traceId ? `Trace: ${notice.traceId}` : null),
-  ]
-    .filter(Boolean)
-    .join("\n");
+    const text = [
+      "💬 New JackGPT chat",
+      `Q: ${preview}`,
+      notice.sessionId ? `Session: ${notice.sessionId}` : null,
+      traceUrl ?? (notice.traceId ? `Trace: ${notice.traceId}` : null),
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-  void fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      disable_web_page_preview: true,
-    }),
-  })
-    .then((res) => {
-      if (!res.ok) {
-        telemetryLogger.debug("[notify] telegram send failed", {
-          status: res.status,
-        });
-      }
-    })
-    .catch((err: unknown) => {
+    const res = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          disable_web_page_preview: true,
+        }),
+      },
+    );
+    if (!res.ok) {
       telemetryLogger.debug("[notify] telegram send failed", {
-        error: err instanceof Error ? err.message : String(err ?? "unknown"),
+        status: res.status,
       });
+    }
+  })().catch((err: unknown) => {
+    telemetryLogger.debug("[notify] telegram send failed", {
+      error: err instanceof Error ? err.message : String(err ?? "unknown"),
     });
+  });
 }
