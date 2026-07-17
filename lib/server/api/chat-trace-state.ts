@@ -52,6 +52,8 @@ export type ChatTraceState = {
   presetId: string | null;
   question: string | null;
   questionHash: string | null;
+  /** Final answer text; populated only when PII capture is allowed. */
+  answerText: string | null;
   retrievalAttempted: boolean | null;
   retrievalUsed: boolean | null;
   retrievalLatencyMs: number | null;
@@ -84,6 +86,7 @@ export function createChatTraceState(): ChatTraceState {
     presetId: null,
     question: null,
     questionHash: null,
+    answerText: null,
     retrievalAttempted: null,
     retrievalUsed: null,
     retrievalLatencyMs: null,
@@ -217,6 +220,7 @@ export function finalizeChatTrace(
       questionHash: state.questionHash ?? null,
       questionLength: state.question?.length ?? 0,
       question: state.question ?? undefined,
+      answer: state.answerText ?? undefined,
       allowPii: state.allowPii ?? false,
       configHash: state.telemetryConfigSnapshot?.configHash ?? null,
       ragConfig,

@@ -43,7 +43,11 @@ To avoid Langfuse "missing input/output" warnings without storing raw prompts or
 - **Trace output** includes `answer_chars`, `citationsCount`, `cache_hit`, `insufficient`, `finish_reason`, `error_category`.
   - On cache hits, `insufficient=true` is inferred only when retrieval was attempted/used and `citationsCount` is 0.
 
-Model response text is never stored on the trace.
+Model response text is never stored on the trace itself. When
+`LANGFUSE_INCLUDE_PII="true"`, the full answer text is stored on the
+`answer:llm` **generation output** (alongside the question on its input), so
+complete transcripts are readable per-generation without widening the trace
+summary contract.
 
 Additionally, the `answer:llm` observation spans the full generation lifecycle, including streaming. It always has a non-zero duration and closes correctly on success, abort, or error with appropriate `finishReason` and `aborted` fields to represent the completion semantics accurately.
 
@@ -243,8 +247,11 @@ The `configHash` is a stable SHA256 hash representing a minimal, safe summary of
 
 ## PII Policy (Explicit)
 
-- Raw question text is excluded by default.
-- It is only included when `LANGFUSE_INCLUDE_PII="true"`.
+- Raw question **and answer** text are excluded by default.
+- Both are included only when `LANGFUSE_INCLUDE_PII="true"` — question on the
+  `answer:llm` generation input, answer on its output. When enabling this in a
+  deployed environment, keep the recording notice visible in the chat UI
+  (see `components/chat/ChatInputBar.tsx`).
 - No chunk text or URLs are included in retrieval telemetry.
 
 ## `rag_retrieval_stage` vs `rag:root`
