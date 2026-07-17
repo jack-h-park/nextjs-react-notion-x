@@ -476,6 +476,36 @@ a.sourcePreviewCard:hover {
   color: hsl(var(--ai-fg-muted));
 }
 
+.messageActionsRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.messageActionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  background: none;
+  border: none;
+  font-size: 0.68rem;
+  color: var(--ai-text-muted);
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.messageActionButton:hover:not(:disabled) {
+  color: var(--ai-accent);
+}
+
+.messageActionButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 .feedbackRow {
   display: flex;
   align-items: center;

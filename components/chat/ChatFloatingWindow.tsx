@@ -56,7 +56,7 @@ export function ChatFloatingWindow({
   const [showOptions, setShowOptions] = useState(false);
   const [isPromoting, setIsPromoting] = useState(false);
   // const messagesEndRef = useRef<HTMLDivElement>(null); // Removed: using useChatScroll
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     messages,
