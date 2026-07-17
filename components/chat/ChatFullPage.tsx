@@ -1,6 +1,7 @@
 "use client";
 
 import { FiAlertCircle } from "@react-icons/all-files/fi/FiAlertCircle";
+import { FiArrowDown } from "@react-icons/all-files/fi/FiArrowDown";
 import { FiMessageCircle } from "@react-icons/all-files/fi/FiMessageCircle";
 import { FiPlus } from "@react-icons/all-files/fi/FiPlus";
 import { FiSliders } from "@react-icons/all-files/fi/FiSliders";
@@ -296,10 +297,11 @@ function ChatShellContent() {
     void sendMessage(latestUserMessage.content, { skipUserInsert: true });
   };
 
-  const { scrollRef, onScroll } = useChatScroll({
-    messages,
-    isLoading,
-  });
+  const { scrollRef, onScroll, scrollToBottom, autoScrollEnabled } =
+    useChatScroll({
+      messages,
+      isLoading,
+    });
 
   return (
     <div data-theme="jp" className={styles.shell}>
@@ -367,7 +369,14 @@ function ChatShellContent() {
               </div>
             </div>
           )}
-          <div className={styles.messages} ref={scrollRef} onScroll={onScroll}>
+          <div
+            className={styles.messages}
+            ref={scrollRef}
+            onScroll={onScroll}
+            role="log"
+            aria-live="polite"
+            aria-label="Conversation"
+          >
             {!hasMessages && (
               <div className={styles.hero}>
                 <ChatEmptyState onSelectPrompt={handleSuggestedPromptClick} />
@@ -386,6 +395,16 @@ function ChatShellContent() {
                 onRetryWithPreset={retryWithPreset}
                 onRegenerate={regenerateLast}
               />
+            )}
+            {hasMessages && !autoScrollEnabled && (
+              <button
+                type="button"
+                className={styles.scrollToBottom}
+                onClick={() => scrollToBottom()}
+                aria-label="Scroll to latest message"
+              >
+                <FiArrowDown aria-hidden="true" size={16} />
+              </button>
             )}
           </div>
           <ChatInputBar

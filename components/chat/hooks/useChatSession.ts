@@ -709,6 +709,19 @@ export function useChatSession(
         updateAssistant(undefined, guardrailMeta);
       }
 
+      // Same as sendMessage: without the traceId the regenerated answer
+      // would silently lose its 👍/👎 feedback control.
+      const traceId = response.headers.get("x-trace-id");
+      if (traceId) {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === assistantMessageId
+              ? { ...message, traceId }
+              : message,
+          ),
+        );
+      }
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let fullContent = "";
