@@ -83,36 +83,41 @@ export function ChatInputBar({
   };
 
   return (
-    <form className={styles.chatInputForm} onSubmit={handleSubmit}>
-      <div className={styles.chatInputWrap}>
-        <textarea
-          className={styles.chatInput}
-          ref={inputRef}
-          value={value}
-          onChange={(event) =>
-            onChange(event.target.value.slice(0, MAX_MESSAGE_LENGTH))
-          }
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={isInputDisabled}
-          rows={1}
-          maxLength={MAX_MESSAGE_LENGTH}
-          aria-label="Chat message"
-        />
-        {showCounter && (
-          <span className={styles.chatInputCounter} aria-live="polite">
-            {value.length} / {MAX_MESSAGE_LENGTH}
-          </span>
-        )}
-      </div>
-      <button
-        type="submit"
-        className={styles.chatSubmitButton}
-        disabled={!isLoading && isSubmitDisabled}
-        aria-label={isLoading ? "Stop generation" : "Send message"}
-      >
-        {isLoading ? <VscDebugStop size={20} /> : <AiOutlineSend size={20} />}
-      </button>
-    </form>
+    <>
+      <form className={styles.chatInputForm} onSubmit={handleSubmit}>
+        <div className={styles.chatInputWrap}>
+          <textarea
+            className={styles.chatInput}
+            ref={inputRef}
+            value={value}
+            onChange={(event) =>
+              onChange(event.target.value.slice(0, MAX_MESSAGE_LENGTH))
+            }
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            disabled={isInputDisabled}
+            rows={1}
+            maxLength={MAX_MESSAGE_LENGTH}
+            aria-label="Chat message"
+          />
+          {showCounter && (
+            <span className={styles.chatInputCounter} aria-live="polite">
+              {value.length} / {MAX_MESSAGE_LENGTH}
+            </span>
+          )}
+        </div>
+        <button
+          type="submit"
+          className={styles.chatSubmitButton}
+          disabled={!isLoading && isSubmitDisabled}
+          aria-label={isLoading ? "Stop generation" : "Send message"}
+        >
+          {isLoading ? <VscDebugStop size={20} /> : <AiOutlineSend size={20} />}
+        </button>
+      </form>
+      <p className={styles.chatInputNotice}>
+        Conversations may be recorded to improve this service.
+      </p>
+    </>
   );
 }
