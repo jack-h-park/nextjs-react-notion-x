@@ -68,6 +68,10 @@ optional — silently disabled when unset.
 | `TELEGRAM_CHAT_ID` | Your chat id (e.g. via @userinfobot) | App-server | Required for notifications |
 | `CHAT_NOTIFY_ENV` | Only notify in this env | App-server | Optional (default `prod`) |
 
+> The trace deep link may show "still being processed" if clicked immediately —
+> the notification fires at chat start, while Langfuse UI ingestion takes
+> ~1–2 minutes. The link works once ingestion completes.
+
 ### Cross-cutting controls
 
 | Variable | Purpose | Environment | Required? |
