@@ -58,12 +58,14 @@ async function resolveLangfuseProjectId(): Promise<string | null> {
  * ever affecting the request.
  */
 export function notifyChatStarted(notice: ChatStartedNotice): void {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  // Trim env values defensively — stray whitespace in .env files would
+  // otherwise break the token or make the env gate silently never match.
+  const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
   if (!botToken || !chatId) {
     return;
   }
-  const notifyEnv = process.env.CHAT_NOTIFY_ENV ?? "prod";
+  const notifyEnv = (process.env.CHAT_NOTIFY_ENV ?? "prod").trim();
   if (notice.environment !== notifyEnv) {
     return;
   }
@@ -79,9 +81,13 @@ export function notifyChatStarted(notice: ChatStartedNotice): void {
     // trace id when no link can be built.
     const baseUrl = process.env.LANGFUSE_BASE_URL;
     const projectId = notice.traceId ? await resolveLangfuseProjectId() : null;
+    // The Langfuse UI locates traces by time partition, so its trace URLs
+    // carry a ?timestamp= anchor — without it the page can report "Trace not
+    // found" even for existing traces. The notice fires right after trace
+    // creation, so "now" is the trace's timestamp.
     const traceUrl =
       notice.traceId && baseUrl && projectId
-        ? `${baseUrl.replace(/\/$/, "")}/project/${projectId}/traces/${notice.traceId}`
+        ? `${baseUrl.replace(/\/$/, "")}/project/${projectId}/traces/${notice.traceId}?timestamp=${encodeURIComponent(new Date().toISOString())}`
         : null;
 
     const text = [
