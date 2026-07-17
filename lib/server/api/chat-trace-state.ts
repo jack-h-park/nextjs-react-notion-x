@@ -1,10 +1,10 @@
-import type { LangfuseTrace } from "@/lib/langfuse";
 import type {
   ChatGuardrailConfig,
   RoutedQuestion,
 } from "@/lib/server/chat-guardrails";
 import type { ChainRunContext } from "@/lib/server/langchain/runnable-config";
 import type { buildTelemetryConfigSnapshot } from "@/lib/server/telemetry/telemetry-config-snapshot";
+import { createObservation, type LangfuseTrace } from "@/lib/langfuse";
 import { emitAnswerGeneration } from "@/lib/server/telemetry/langfuse-generations";
 import {
   buildSafeTraceInputSummary,
@@ -184,6 +184,23 @@ export function finalizeChatTrace(
       metadata: {
         aborted: finishReason === "aborted",
       },
+    });
+  }
+
+  // At-a-glance failure marker: Langfuse surfaces the highest observation
+  // level on the trace list, so failed/aborted requests get a red/yellow badge
+  // instead of looking identical to successful ones until the tree is opened.
+  const finalReason = state.outputSummary?.finish_reason;
+  if (state.trace && (finalReason === "error" || finalReason === "aborted")) {
+    void createObservation(state.trace, {
+      name: finalReason === "error" ? "request:error" : "request:aborted",
+      level: finalReason === "error" ? "ERROR" : "WARNING",
+      statusMessage:
+        finalReason === "error"
+          ? (state.errorCategory ??
+            state.outputSummary?.error_category ??
+            "unknown error")
+          : "client aborted the request",
     });
   }
 

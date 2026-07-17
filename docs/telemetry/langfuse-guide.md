@@ -155,6 +155,9 @@ Configuration snapshots stay under `chatConfig`/`ragConfig`; runtime facts live 
   - `context:selection` → dedupe/quota/MMR selection stats (knowledge intent only)
   - `answer:llm` → generation execution with streaming-safe timing and proper abort/error semantics
   - `rag_retrieval_stage` → verbose retrieval diagnostics
+  - `request:error` / `request:aborted` → at-a-glance failure markers, emitted
+    at finalization with level `ERROR` / `WARNING` so failed requests carry a
+    visible level badge in the trace list instead of looking like successes
 
 ## Emission Matrix by Intent and Detail Level
 
